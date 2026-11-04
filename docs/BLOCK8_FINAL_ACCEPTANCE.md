@@ -1,82 +1,48 @@
-# Kết quả hoàn thiện Block8 và bàn giao
+# Kết quả nghiệm thu Block8
 
-Đối chiếu [prompt nhóm trưởng](requirements/PROMPT-block8-auth-block5-ssr.md) và [slide Block8](https://pub.nndkhoa9.win/web/week6/block8-deck.html), đã tải/đọc66 slide, tập trung48–63. Đây là đợt khắc phục sau audit3622041, ngày04/11/2026. Giữ Express/EJS SSR, Prisma/PostgreSQL, CRUD và phân trang; không Block9. Không reset/seed/dbpush/migrate DB nhà hàng để kiểm thử. Không đổi dependency/lockfile để cài browser.
+Đối chiếu [slide Block8](https://pub.nndkhoa9.win/web/week6/block8-deck.html), đặc biệt48–63, và [prompt nhóm trưởng](requirements/PROMPT-block8-auth-block5-ssr.md). Bản audit chi tiết, source và34 tiêu chí: [BLOCK8_AUTHENTICATION_AUDIT_REPORT](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md).
 
-## Những gì đã thực hiện và kiểm chứng
+## Kết luận
 
-| Kiểm tra | Kết quả chạy mới | Bằng chứng |
+Chức năng chính đã triển khai và các suite đã chạy đạt trong phạm vi ghi dưới đây. Người dùng xác nhận đăng ký → CAPTCHA → nhận OTP qua email thật → kích hoạt → đăng nhập → mở `/dishes?pageSize=10&page=1` thành công. Không giữ email/OTP/cookie trong báo cáo; đây là xác nhận của người dùng, không phải ảnh/test tự động do agent thu.
+
+**Chưa tuyên bố hoàn thành100% hồ sơ bài tập/nghiệm thu.** Phần ảnh DevTools theo từng kịch bản và sơ đồ do nhóm tự vẽ của slide63 chưa đủ; GET vẫn ghi metadata bảo mật và timing chống dò email chưa được bảo đảm. Push source không biến các mục này thành PASS.
+
+## Kết quả đã chạy
+
+| Kiểm tra | Kết quả | Bằng chứng/phạm vi |
 |---|---|---|
-| Offline/HTTP fixture + guard mail/redaction/CSRF unit | **22/22PASS**, exit0 | `npm.cmd test`; test mới `tests/auth.security.test.js` |
-| HTTP/server/Prisma/Argon2/session/SMTP local | **20/20 nhóm PASS**,251 request; schema test đã xóa, không ghi schema ứng dụng | [http-results](evidence/auth-final/http-results.json), hoàn tất2026-11-04T11:46:46.519Z |
-| Chrome native auth và phân trang sau login | **4/4PASS**,1440/375px × JSon/off;45 ảnh; Chrome156.0.8078.80; schema test đã xóa | [browser-results](evidence/auth-browser-final/browser-results.json), hoàn tất2026-11-04T11:43:55.764Z; [cleanup](evidence/auth-browser-final/http-results.json) |
-| Navbar auth tương phản nền, không tràn ngang | **4/4PASS**,1440/375px × JSon/off,4 ảnh; đã xem ảnh375/noJS | [navbar results](evidence/auth-navbar-final/results.json) |
-| SMTP/inbox thực tế của người dùng | **Chưa xác minh**; khi kiểm tra cờ cấu hình, chưa có SMTP, đang Ethereal | [MAIL_SETUP](MAIL_SETUP.md). Không có credential được đọc/in ra |
+| Offline |24/24PASS|`npm.cmd test`: validation/SSR/pagination/auth security, gồm mail diagnostics redaction và browser-only guard|
+| HTTP/Prisma/SMTP local |21/21 nhóm PASS,276 request|[HTTP JSON](evidence/auth-release-http/http-results.json); isolatedSchemaRemoved=true, không ghi schema nhà hàng|
+| Hai server process |PASS|A21 dùng chung Session/RateLimit, logout/reset thu hồi xuyên process; HTTP local, không load balancer production|
+| Chrome native |4/4PASS,45 ảnh|[Browser JSON](evidence/auth-release-browser/browser-results.json),1440/375px × JSon/off; [cleanup](evidence/auth-release-browser/http-results.json)|
+| Navbar auth |4/4PASS đợt trước|[JSON](evidence/auth-navbar-final/results.json); nền đặc và không tràn ngang|
+| OTP email thật |Người dùng xác nhận thành công|Register/kích hoạt/login/list; reset và email thông báo đổi password ngoài SMTP local chưa xác nhận|
+| Cleanup đường lỗi setup |PASS|[cleanup-results](evidence/auth-cleanup-smoke/cleanup-results.json); HTTP FAIL cùng thư mục là đúng dự kiến khi module browser thiếu, không phải nghiệm thu auth FAIL|
 
-Browser-only có `checks:0` trong file harness HTTP vì bỏ20 nhóm HTTP; bốn ca native thật nằm trong browser-results, không được đọc số0 thành “không chạy browser”. Test gọi đúng middleware/crypto/store, không mock quyết định bảo mật; dữ liệu là fixture trong schema PostgreSQL tách biệt, mail nhận bởi SMTP TCP local. Không lấy mock pass để chứng minh inbox/production.
+Đã chạy lại source cuối có mailDiagnostics: HTTP hoàn tất 2026-11-04T15:48:33.647Z; Chrome156.0.8078.80 hoàn tất 2026-11-04T15:45:29.306Z. Cả hai schema test đã dọn. Các thư mục auth-final, auth-browser-final, auth-reset-before và auth-observer-before-reset-fix là bằng chứng lịch sử có nhãn; không coi lượt FAIL trước sửa là kết quả source cuối.
 
-Các ca browser đã submit native form register, pending login, OTP sai/đúng, login bằng Tab/Enter, forgot, reset, logout; kiểm sid rotate, session qua restart, thu hồi session sau reset/logout. Hai list có q/filter/sort/pageSize/link/history sau đăng nhập, không tràn ngang375px. Ảnh chụp che input, CAPTCHA và email; không HAR/trace/storageState hoặc payload chứa bí mật.
+## Ma trận và yêu cầu ngoài ma trận
 
-## Sửa lỗi và đính chính hợp đồng
-
-- **Lỗi thật do agent:** Chrome native reset403 vì no-referrer làm Origin:null. Sửa ngoại lệ hẹp POSTreset+same-origin Fetch Metadata+CSRF đúng, giữ các biến thể cross-site/null khác403. [Hồ sơ trước/sau](BUG_RESET_BROWSER_403.md) có ảnh và JSON lỗi trước sửa; sau sửa cả4 context native reset303login. Trong JSON `network.fetchSite` có thể null vì API `request.headers()` không cung cấp header này; không dùng trường null đó để khẳng định browser không gửi header. Repro HTTP server tạm đã quan sát trực tiếp same-origin; middleware bắt buộc nó mới cho qua Origin:null.
-- Resend không tiết lộ pending qua429/303 khi quota public và challenge lệch nhau. Quota public áp dụng mọi email, internal backstop chỉ suppress mail. Có regression thật nhóm17.
-- CAPTCHA ID hợp lệ được consume dù answer thiếu/sai kiểu/quá dài; OTP kiểm attempts trước hash;404 không phản chiếu querytoken.
-- Production không tạo Ethereal mailbox hoặc log preview. Dev vẫn cho preview theo yêu cầu prompt; link vẫn phải giữ riêng.
-- **Đính chính ACT-05 cũ:** mục5.1 prompt yêu cầu register hợp lệ mọi nhánh đều303. Không đổi riêng pending thành429.429 ở activate/resend do quota vẫn được thực thi/kiểm chứng.
-
-## Ma trận34 tiêu chí sau khắc phục
-
-A01…A20 là thứ tự các nhóm `checks` trong http-results mới; B là4 context browser, U là bộ unit22 ca. Không đồng nhất số nhóm test với phần trăm hoàn thành bài.
-
-| ID | Kết quả | Chứng cứ/giới hạn |
+| Phạm vi | Kết quả | Giải thích |
 |---|---|---|
-| SRC-01 | PASS | A05/A12/A13 kiểm hash; U chặn Ethereal production. Raw OTP/link chỉ đi qua mail/form đúng mục đích; dev preview được prompt cho phép, không log rawsecret |
-| SRC-02 | PASS | A05/A09/A13, Argon2id thật |
-| SRC-03 | PASS | A06/B pending không Session.userId |
-| SRC-04 | PASS | A02/A15, guard mọi CRUD method/list/detail/form |
-| SRC-05 | PARTIAL | A12/B GETreset không đổi usedAt/password; GET auth vẫn ghi metadata Session/CAPTCHA/counter. Câu cấm mọi ghi GET tuyệt đối chưa khớp |
-| SRC-06 | PASS | A04/A09/A10/A18: store/counterDB, no hidden answer/cookie payload |
-| ACT-01 | PASS | A06/B pending denied |
-| ACT-02 | PASS | A06/A07/B active đúng user, verifiedAt |
-| ACT-03 | PASS | A06/A07/A08/B cùng INVALID_OTP dưới quota; khóa/quá lượt ưu tiên429 |
-| ACT-04 | PASS | A07/A08 old rejected/new accepted |
-| ACT-05 | PASS | A08/A14,429 cho activate/resend, attempts/lock không reset; register uniform303 đúng mục5.1 prompt |
-| ACT-06 | PASS | A05 roleadmin body bị bỏ qua, viewer |
-| ACT-07 | PASS | A06/B activated chưa login |
-| ACT-08 | PASS | A06 OTP không làm password |
-| CAP-01 | PASS | A04 không user/mail |
-| CAP-02 | PASS | A05/B SMTP local nhận OTP |
-| CAP-03 | PASS | A04/A16 replay/expired/purpose/anon/malformed |
-| CAP-04 | PASS | A09 correctpassword thiếuCAPTCHA denied trướcverify; đối chiếu thứ tự source |
-| CAP-05 | PASS | A09 count tăng4…10 dù CAPTCHA đúng |
-| CAP-06 | PASS | A18 đúng cảCAPTCHA/password khi khóa qua restart vẫn429 |
-| CAP-07 | PASS | A09 clientjar mới không né emailcounter |
-| SES-01 | PASS | A02/B anonymous303, nghiệp vụ không ghi |
-| SES-02 | PASS | A09/A15/B303,sid,CRUD; SecureHTTPS production chưa quan sát thực |
-| SES-03 | PASS | A09 cùng thông báo missingemail/wrongpassword |
-| SES-04 | PASS | A09/Bsid rotate |
-| SES-05 | PASS | A10/B restart process thật giữ cookie/session |
-| SES-06 | PASS | A10/Blogout rowgone,replaydenied,stale set không hồi sinh |
-| SES-07 | PASS | A03/A15/U/B thiếuCSRF/Originngoài403; ngoại lệ reset được giới hạn |
-| RST-01 | PARTIAL | A12/A20/B cùngstatus/content. Có8 cặp timing mô tả, chưa đủ chứng minh không thể dò bằngtiming |
-| RST-02 | PASS | A12/A14forgotquota429 |
-| RST-03 | PASS | A12/A13/Btokenold/expired/usedrejected,atomicclaim |
-| RST-04 | PASS | A12/BGETreset không claim |
-| RST-05 | PASS | A13/Bnoautologin,oldsessiondenied |
-| RST-06 | PASS | A19token không thaypassword/OTP/signedsid |
-| **Tổng34** | **32PASS /0FAIL /2PARTIAL /0UNVERIFIED /0NOT_APPLICABLE** | Những hạng mục ngoài34 chưa nghiệm thu được liệt kê riêng dưới đây |
+|34 mục slide57–61|33PASS/0FAIL/1PARTIAL|SRC-05 PARTIAL vì metadata GET; forgot cùng nội dung/status đạt RST-01 theo slide61|
+|Cùng34 ID khi thêm timing của prompt|32PASS/0FAIL/2PARTIAL|SRC-05 và RST-01 timing chưa đạt bảo đảm; không sửa policy chỉ để làm đẹp số đo|
+|Slide62, câu hỏi trình bày|Có tài liệu tham khảo|Audit mục9 và flows; chưa chứng minh thành viên nhóm đã tự trình bày|
+|Slide63, bằng chứng cho từng ca|PARTIAL|Có UI screenshot, request/cookie flags và DB snapshot đã che; chưa đủ ảnh đúng tab Network/Application cho từng kịch bản|
+|Slide63, sơ đồ do nhóm vẽ|Chưa xác nhận|Có Mermaid tham khảo trong flows; không tuyên bố agent thay nhóm tự vẽ|
+|Slide63, lỗi do agent và sau sửa|Có hồ sơ|[Reset native403](BUG_RESET_BROWSER_403.md), ảnh/JSON trước sửa, regression native browser sau sửa|
 
-Timing A20 chỉ đo POSTforgot, luân phiên thứ tự known/unknown,8 cặp: trung bình2080/1864ms; known1973–2483ms, unknown1776–2359ms. Chênh trung bình216ms, các khoảng chồng lấn. Không suy ra constant-time hoặc không có side-channel từ16 quan sát; không coi floor1200ms là thời gian cố định. Không benchmark production.
+Số nhóm test không phải tỷ lệ hoàn thành bài tập. Audit có đủ34 dòng source/test và giải thích sự khác nhau giữa hai phạm vi.
 
-## Hồ sơ slide62–63 và giới hạn còn lại
+## Giới hạn cần giữ rõ
 
-- [Sơ đồ luồng](flows.md), [vấn đáp audit gốc](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md), [VERIFY](VERIFY.md) và [hồ sơ lỗi agent](BUG_RESET_BROWSER_403.md) đã có. Prompt yêu cầu agent cung cấp bản tham khảo; nhóm vẫn phải **tự vẽ và giải thích** khi nộp, không được tuyên bố agent đã thay nhóm thực hiện phần trình bày.
--45 ảnh auth thật từ schema test trong [auth-browser-final](evidence/auth-browser-final/);4 ảnh navbar cuối trong [auth-navbar-final](evidence/auth-navbar-final/). Các20 nhóm HTTP có request/redirect/Set-Cookieflags và snapshotDB đã che trong JSON mới.
-- Bảng HTML/ảnh tổng hợp UI/Network/Cookies/DB của lượt observer **trước sửa reset** được tách tại [auth-observer-before-reset-fix/index.html](evidence/auth-observer-before-reset-fix/index.html); đây là lịch sử, không coi UI trước sửa là ảnh cuối. Ảnh lỗi rõ ràng trong auth-reset-before. Bảng tổng hợp thu dữ liệu thật bằng API, **không phải ảnh tab DevTools**; nếu giáo viên yêu cầu đúng DevTools/Application, nhóm chụp theo VERIFY và che credential. Chưa có bộ ảnh DevTools cho riêng từng34 tình huống.
-- Literal “mọi GET không ghi bất cứ metadata nào” xung đột với CAPTCHA SSR cấp challengeDB và rollingDBsession. Đã công bố ngoại lệ; chưa loại mọi metadatawrite.
-- Runtime auth không SQL riêng vendor, nhưng schema UUID/migration và test hiệnPostgreSQL. Không thay schema đang phục vụ dữ liệu nhóm để đánh dấu yêu cầu đaDB đạt. Chưa nghiệm thu provider khác.
-- Chưa xác minh inbox SMTP thật, HTTPS/proxy/Securecookie trên deployment, nhiềuinstance, screenreader/OCR hay phân tích timing production. Những điều này không trở thành PASS chỉ vì code được push.
+- GET không ghi bảng nhà hàng hoặc đổi user/password/usedAt reset; vẫn ghi Session/TTL/CAPTCHA/counter phát ảnh. Đây là sai khác so với câu cấm mọi ghi GET tuyệt đối.
+- A20 lượt cuối276 request:8 cặp forgot, known trung bình1981ms, unknown1786ms; hai khoảng1930–2172 và1737–1859ms không chồng lấn. Floor1200ms và mail async chưa chứng minh chống dò timing; không benchmark production.
+- Dev preview Ethereal được prompt cho phép nhưng phải giữ riêng; production không fallback/log preview. Lỗi535 của cấu hình mail trước đó là lịch sử sau khi người dùng xác nhận OTP thật thành công.
+- Chưa quan sát HTTPS/proxy/Secure cookie trên deployment, load balancer/race xuyên instance, DB provider khác, screen reader hoặc OCR. Runtime Prisma không SQL riêng vendor, nhưng schema/migration UUID hiện PostgreSQL.
+- Không seed/reset/dbpush/migrate schema nhà hàng khi kiểm thử. Credential chỉ tự nạp trong RAM; ảnh/JSON không chứa raw secret. Không thu lại OTP thật hoặc gửi mail ngoài để có thêm bằng chứng.
 
-## Chạy trên máy mới
+## Trước khi nộp
 
-Đọc [HANDOFF](HANDOFF_BLOCK8.md). Clone main chứa commit mới, vào đúng Web-Block5 chạy npmci rồi npxprismagenerate; tự cấu hình.env ngoàiGit, không migrate/seed/reset DB có sẵn khi chỉ đổi máy. Browser/tool/process đang chạy không di chuyển cùngGit. Có thể bắt đầu chat Codex mới bằng câu nhắn trong HANDOFF. Không cần chuyển cookie hoặc secret Codex để giữ ngữ cảnh dự án.
+Nhóm đối chiếu checklist trong [VERIFY](VERIFY.md), tự chụp ảnh UI/Network/Application và request trực tiếp cho các tình huống còn thiếu, che credential/token/cookie/email. Tự vẽ và giải thích sơ đồ từ [flows](flows.md). Không đánh dấu đã làm thay nhóm; các giới hạn source/prompt ở trên vẫn phải được công bố khi trình bày.

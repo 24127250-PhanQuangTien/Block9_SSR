@@ -1,115 +1,105 @@
 # Kiểm chứng Block8 và phân trang SSR
 
-## Đợt hoàn thiện sau audit, ưu tiên slide48–63
+Nguồn yêu cầu: [slide48–63](https://pub.nndkhoa9.win/web/week6/block8-deck.html). [Audit](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md) có đủ34 tiêu chí, source và kết quả; [FINAL_ACCEPTANCE](BLOCK8_FINAL_ACCEPTANCE.md) tóm tắt trạng thái hiện tại. Kịch bản dưới đây là hướng dẫn tái kiểm, không tự chứng minh nhóm đã chụp đủ ảnh hoặc tự trình bày.
 
-`npm.cmd test`:22 ca offline sau bổ sung guard production mail và redaction/CSRF Origin:null. `npm.cmd run test:auth`:20 nhóm server/Prisma/PostgreSQL/SMTP local, thêm malformed CAPTCHA one-use, resend status privacy, correct CAPTCHA+password khi locked qua restart, reset token sai ba mục đích,8 cặp timing mô tả. Snapshot DB và request log allowlist được ghi tại `docs/evidence/auth-final/http-results.json`; không raw HTML/payload/HAR/storageState.
+## Kết quả đã hoàn tất
 
-`npm.cmd run test:auth -- --browser --browser-only`: Chrome riêng,1440/375px, JSon/off, native register/pending/OTP/login/forgot/reset/logout, keyboard focus/Enter, cả hai list có filter/sort/pageSize/history sau login; dữ liệu thật trong schema fixture riêng, không DB nhà hàng. Artifact: `docs/evidence/auth-browser-final/browser-results.json`, ảnh `auth-*.png`. Để chạy cả20 nhóm + browser observer: `npm.cmd run test:auth -- --browser`, tạo bảng HTML và ảnh UI/Network/Cookies/DB theo nhóm ở auth-final.
+- Offline24/24PASS: `npm.cmd test` với validation, HTTP/EJS, pagination và auth security.
+- [HTTP](evidence/auth-release-http/http-results.json):21/21 nhóm PASS,276 request, schema riêng đã xóa; SMTP local, hai process server thật. Đã chạy lại source cuối gồm mailDiagnostics, hoàn tất 2026-11-04T15:48:33.647Z.
+- [Chrome](evidence/auth-release-browser/browser-results.json):4/4PASS,45 ảnh,1440/375px × JS bật/tắt, Chrome156.0.8078.80, hoàn tất 2026-11-04T15:45:29.306Z; [cleanup](evidence/auth-release-browser/http-results.json).
+- Người dùng xác nhận đã nhận OTP qua email thật, kích hoạt, đăng nhập và vào `/dishes?pageSize=10&page=1`. Không giữ email/OTP/sid vào repo; chưa xác nhận reset/thông báo password qua inbox ngoài.
+- [Cleanup smoke](evidence/auth-cleanup-smoke/cleanup-results.json): module browser thiếu, harness FAIL đúng dự kiến và vẫn dọn schema. Không tính FAIL này vào nghiệm thu ứng dụng và không dùng làm hồ sơ lỗi slide63.
 
-Các ảnh bảng Network/Cookies/DB là **dữ liệu quan sát thật đã che từ HTTP/Playwright/Prisma**, không phải ảnh cửa sổ DevTools. Slide63 nếu giáo viên cần đúng tab Network/Application trong Chrome, nhóm chụp thủ công theo bảng phía dưới, che mọi cookie/token/OTP/secret. Không gọi ảnh bảng tổng hợp là ảnh DevTools. UI của observer là trạng thái cuối nhóm; request log trong cùng nhóm chứa các trường hợp chi tiết, không giả định một ảnh UI chứng minh mọi bước.
-
-Bằng chứng lỗi agent trước/sau: `docs/BUG_RESET_BROWSER_403.md`, ảnh trước sửa trong `docs/evidence/auth-reset-before/`; JSON FAIL trước sửa phải được giữ nhãn lịch sử, không gộp thành PASS của mã cuối. Kết quả cuối cùng xem HANDOFF; không kết luận pass từ file ảnh lẻ khi suite chưa kết thúc.
-
-## Phân biệt môi trường
-
-- **Ứng dụng thật:** `npm start`, `http://localhost:3000`, database nhóm có 1.018 món/11 đầu bếp/60 nguyên liệu. Chỉ seed tài khoản auth mới và thao tác login/session; không ghi dữ liệu CRUD. Snapshot CRUD trước/sau migration trùng hoàn toàn.
-- **Auth tích hợp thật:** `npm run test:auth`. Tạo schema PG ngẫu nhiên `auth_test_<24 hex>`, chạy migration trong schema đó, server riêng port 3108, Prisma/Argon2/session/CSRF/CAPTCHA/rate limit thật; SMTP TCP cục bộ nhận email thật của Nodemailer. Không mock quyết định bảo mật. Chỉ dữ liệu test trong schema này được tạo/sửa/xóa và schema được dọn sau khi chạy.
-- **Offline:** `npm test`. Lớp persistence là fixture, nhưng vẫn đăng nhập qua route thật, verify Argon2 thật và đi qua session/CSRF/guard. Không dùng kết quả offline để khẳng định kết nối hay lưu trữ DB thật.
-- **Browser thật:** `node tests/pagination.browser.js <đường-dẫn-module-playwright>`. Chrome headless mới, profile/context riêng; desktop 1440×900 và 375×900, JavaScript bật/tắt. Đăng nhập bằng credential tự nạp từ .env, không log; screenshot che email và trường credential. Chỉ POST `/login` và GET danh sách, không POST CRUD/logout.
-
-Không chạy `npm run test:db` cũ trong lần này: script cũ gọi seed nhà hàng ở schema tạm và chưa mô tả đầy đủ auth. Suite `test:auth` thay thế phần nghiệm thu tích hợp Block8, có CRUD sau login và CSRF.
-
-## Lệnh đã dùng
+## Chạy kiểm thử an toàn
 
 ```powershell
-npm.cmd install express-session argon2 svg-captcha nodemailer validator
-npm.cmd run auth:configure
-npm.cmd run db:auth:generate
-npm.cmd run db:auth
-npm.cmd run seed:auth
-npm.cmd start
 npm.cmd test
+$env:AUTH_EVIDENCE_DIR = 'docs/evidence/auth-release-http'
 npm.cmd run test:auth
-node tests/mail-smoke.js
-node tests/pagination.browser.js C:/Users/PC/AppData/Local/Temp/ssr-pagination-playwright/node_modules/playwright
+# Playwright ở thư mục công cụ ngoài dependency app:
+npm.cmd install --prefix "$env:TEMP\ssr-pagination-playwright" playwright@1.64.1
+$env:AUTH_TEST_PORT = '3109'
+$env:AUTH_EVIDENCE_DIR = 'docs/evidence/auth-release-browser'
+npm.cmd run test:auth -- --browser --browser-only
 ```
 
-Playwright được cài vào thư mục công cụ tạm bằng `npm install --prefix <thư-mục-tạm> playwright`; không nằm trong dependency hoặc lockfile của app. `auth:configure` chỉ bổ sung khóa còn thiếu và không in giá trị. `db:auth` đã tiếp nhận năm bảng auth hiện hữu, giữ nguyên bảng `session` cũ và tạo bảng `Session` mới. Có một lỗi tạo trùng bảng P3018 ban đầu; đã đối chiếu metadata, đánh dấu lần thất bại rolled back rồi áp dụng/adopt đúng migration. Không reset hoặc chạy seed dữ liệu nhà hàng.
+Có thể chạy đủ HTTP+browser bằng `npm.cmd run test:auth -- --browser`; chỉ dùng browser-only khi có cả cờ browser. Đợi status/completedAt và isolatedSchemaRemoved trước kết luận. Chế độ browser-only có0 HTTP checks,4 ca native trong browser-results.
 
-Kết quả máy đọc: `docs/evidence/auth-integration.json`, `docs/evidence/pagination-browser/results.json`. Các JSON không chứa credential, OTP, token hoặc cookie. Kết quả trước sửa có thể được ghi đè bởi vòng chạy cuối; chỉ dùng trường status và completedAt của kết quả cuối khi nghiệm thu.
+Harness tạo schema PostgreSQL `auth_test_<24 hex>`, migration và fixture chỉ trong schema đó, secret test sinh trong RAM, SMTP TCP local. Không ghi schema ứng dụng. Theo dõi/dọn mọi server process, thử dọn schema cả khi migration thất bại; lỗi đóng browser không bỏ qua cleanup DB.
 
-## Curl an toàn với cookie jar
+Không chạy `npm.cmd run seed`, `test:db` cũ, dbpush, reset hoặc migration schema nhà hàng để thử auth. Không gửi OTP/email thật hàng loạt, không brute force tài khoản người dùng. Không mock hoặc bỏ CSRF/CAPTCHA/guard để làm test pass. Không dùng phiên browser đang đăng nhập của người dùng cho suite tự động.
 
-Chỉ dùng trên database test cho trường hợp có ghi tài khoản hoặc CRUD. Không dùng `-v`/`-i`, không in cookie jar/header/body mật khẩu; lưu artifact nhạy cảm trong thư mục tạm ngoài Git và xóa sau kiểm tra. Đây là mẫu lệnh, không phải credential thực tế.
+## Checklist từng kịch bản
+
+Tất cả thao tác có ghi dưới đây phải ở schema test. A01…A21 là nhóm trong HTTP JSON; B là browser context. Kết quả PASS nguồn/test có trong audit; ảnh DevTools cần tự chụp theo phần kế tiếp.
+
+| ID | Thao tác tái kiểm | Kết quả cần chứng minh | Quan sát/DB an toàn |
+|---|---|---|---|
+|SRC-01|Rà crypto, mail, mailDiagnostics, view reset|Không secret raw trong log/DB/bằng chứng ngoài mục đích hợp lệ|Algorithm/hashStored, không hash/raw value|
+|SRC-02|Register/login/reset thật|Argon2id, không MD5/SHA password|Chỉ prefix algorithm; A05/A09/A13|
+|SRC-03|Login pending đúng password|ACTIVATION_REQUIRED, không authenticated session|Session.userId count0; A06/B|
+|SRC-04|Gọi mọi GET/POST/override CRUD không cookie|303login trước write|A02, count CRUD không đổi|
+|SRC-05|GETreset; GETregister/authenticated list|usedAt/password không đổi; công bố metadata GET có ghi|A12/B; Session/CAPTCHA/quota là ngoại lệ PARTIAL|
+|SRC-06|Xem hidden/cookie/client data|Chỉ ID/ảnh CAPTCHA, signedSID; store/counter ở server|A04/A16; không chụp đáp án|
+|ACT-01|Pending login|Không session authenticated|A06/B|
+|ACT-02|Activate OTP đúng|Đúng user active+emailVerifiedAt|A06/A07/B; che OTP/userId|
+|ACT-03|OTP sai/expired/used|Cùng INVALID_OTP dưới quota, user status không đổi|A06/A07/A08; khóa ưu tiên429|
+|ACT-04|Resend sau cooldown, thử old/new|Cũ bị từ chối, mới kích hoạt được|A07; chỉ chụp thời gian/usedAt|
+|ACT-05|Đến ngưỡng attempts/send|Server429, resend không reset attempts/lock|A08/A14/A17; metadata fixture ở mép ngưỡng|
+|ACT-06|Register body roleadmin|DB viewer|A05; chỉ role/status|
+|ACT-07|GETdishes sau activate|303login, không auto-login|A06/B|
+|ACT-08|OTP dùng làm password|INVALID_CREDENTIALS|A06; che toàn bộ payload|
+|CAP-01|Register thiếu/sai CAPTCHA|Không tạo user/mail|A04 user/inbox count|
+|CAP-02|CAPTCHA+dữ liệu hợp lệ|Pending/OTP đi tiếp|A05/B; không chụp raw email|
+|CAP-03|Replay/expired/other-session/purpose|CAPTCHA_FAILED|A04/A16 usedAt; che answer/anonId|
+|CAP-04|Sau3 sai bỏ CAPTCHA, dùng password đúng|Dừng trước verify password|A09 count vẫn3; đối chiếu thứ tự source|
+|CAP-05|Đúng CAPTCHA, password sai|Email failure count tăng|A09 count4…10|
+|CAP-06|Đang khóa, password/CAPTCHA đúng|429, không session|A18 giữ lock qua restart|
+|CAP-07|Cookie jar/phiên mới khi khóa|Không né email counter|A09/A21|
+|SES-01|Không cookie gọi CRUD|303login, không write|A02|
+|SES-02|Login active|303, SID cookie, vào CRUD/list|A09/A15/B; che giá trị Set-Cookie|
+|SES-03|Email lạ/password sai|Cùng INVALID_CREDENTIALS|A09; không dùng timing để suy pass|
+|SES-04|SoSID trước/sau trong RAM|Khác nhau|A09/B; không in hai SID|
+|SES-05|Stop/start server test, cookie cũ|200 với DB session còn hạn|A10/B; A21 thêm hai process|
+|SES-06|POSTlogout, replaycookie, stale store.set|Session rowgone, replay303, không hồi sinh|A10/B/A21|
+|SES-07|ThiếuCSRF/Originkhác/null ngoài ngoại lệ|403 khi đã authenticated|A03/A15/U/B; cheCSRF|
+|RST-01|Forgot email có/không|Cùng303sent và thông báo|A12/A20/B; timing là hạn chế prompt riêng|
+|RST-02|Forgot quá quotaIP/email|429|A12/A14|
+|RST-03|Tokenold/expired/used; concurrent reset|Từ chối và password không đổi trái phép; chỉ1 thắng|A12/A13/B; cheURL/token/hash|
+|RST-04|GETreset hợp lệ|Form/no-referrer, usedAt vẫnnull|A12/B; so row trước/sau|
+|RST-05|Reset đúng|Không auto-login, mọi SID cũ denied|A13/B/A21; Session.userId count0|
+|RST-06|Token ởlogin/activate/sid|Không password/OTP/signedSID|A19; token không consume|
+
+## Request trực tiếp và cookie jar
+
+Dùng terminal riêng và schema test; không `curl -v/-i`, không in cookie jar, password, token, raw header/body. Ví dụ chỉ GET để chứng minh guard và lấy form:
 
 ```powershell
 $authJar = Join-Path $env:TEMP 'block8-cookie-jar.txt'
 $authHtml = Join-Path $env:TEMP 'block8-form.html'
-curl.exe -s -c $authJar -o $authHtml http://localhost:3000/login
+curl.exe -s -o $authHtml -w '%{http_code}' http://localhost:3108/dishes
+# Mong đợi303; xem Location đã che trong JSON/Network, không theo redirect để nhầm200.
+curl.exe -s -c $authJar -o $authHtml http://localhost:3108/login
 $csrf = [regex]::Match([IO.File]::ReadAllText($authHtml), 'name="_csrf" value="([^"]+)"').Groups[1].Value
-# SEED_USER_* phải có trong môi trường terminal riêng; không echo các biến.
-curl.exe -s -b $authJar -c $authJar -o $authHtml -w '%{http_code}' -H 'Origin: http://localhost:3000' --data-urlencode "_csrf=$csrf" --data-urlencode "email=$env:SEED_USER_EMAIL" --data-urlencode "password=$env:SEED_USER_PASSWORD" http://localhost:3000/login
-# Mong đợi 303, sau đó GET với cùng jar; không -L khi đang quan sát PRG.
-curl.exe -s -b $authJar -c $authJar -o $authHtml -w '%{http_code}' 'http://localhost:3000/admin/dishes?page=2&pageSize=10'
-# Mong đợi 200. Luôn lấy lại _csrf từ form mới sau login vì sid/token đã đổi.
+# Không echo csrf/cookie/HTML. POST ở cùng jar, đúng Origin và _csrf.
+# Suite test:auth đã thực thi các POST thật và xuất transcript đã che.
 ```
 
-Với route khác: GET form → lấy `_csrf` và `challengeId` từ HTML (không đáp án), POST cùng jar + Origin. Người kiểm tra đọc CAPTCHA/OTP/email trực tiếp ở môi trường test; không đưa đáp án hoặc token vào lệnh chụp ảnh/báo cáo. Bỏ `_csrf` hoặc đổi Origin phải 403; bỏ cookie khi gọi CRUD phải 303 `/login`.
+Để tự tái kiểm bằng curl, lấy lại CSRF từ form mới sau login/regenerate, gửi cookie jar bằng `-b/-c`, body form-urlencoded và Origin cùng APP_ORIGIN; lưu response vào file tạm. Xác minh các status303/200/400/403/429 trong bảng. Không lưu payload chứa password/OTP/token vào Git. Dọn file tạm sau khi kiểm; credential chỉ nhập trong terminal/browser riêng.
 
-## Kịch bản từng nhóm yêu cầu
+## Chụp bằng chứng slide63
 
-Tất cả dòng “tích hợp” dưới đây được thực hiện trong schema test riêng, không trên dữ liệu nhà hàng hiện hữu. Các test tự chuẩn bị metadata hết hạn/đếm ở ngưỡng trong schema riêng để không chờ 5/15/60 phút; không đổi chính sách server hoặc bỏ kiểm tra bảo mật.
+Với **mỗi kịch bản** trong bảng, nhóm cần lưu đủ ảnh UI, Network, Application/Cookies và request trực tiếp, kèm DB field liên quan. Bảng HTML do Playwright/HTTP/Prisma dựng từ dữ liệu thật đã che không phải ảnh giao diện DevTools.45 screenshot auth không tự chứng minh đủ toàn bộ34 dòng.
 
-| Kịch bản | Cách kiểm tra | Mong đợi | Bằng chứng và chỗ cần che |
-|---|---|---|---|
-| Pending login đúng password | POST login cùng jar/CSRF | HTML 200 ACTIVATION_REQUIRED, không Session.userId | Tích hợp; Network; che password/sid |
-| OTP đúng | POST activate email + mã từ mail test | 303 login, active + verifiedAt, chưa đăng nhập | Tích hợp; DB chỉ chụp status/verifiedAt, che OTP/hash |
-| OTP sai/hết hạn/đã dùng | Gửi lại với mã sai/metadata hết hạn | INVALID_OTP, không kích hoạt sai | Tích hợp; che payload và hash |
-| Resend đổi mã | Cho cooldown qua, POST resend, thử mã cũ/mới | Cũ INVALID_OTP, mới kích hoạt được | Tích hợp; mail SMTP được giữ RAM, không chụp OTP |
-| Resend/thử OTP vượt ngưỡng | 5 thử sai hoặc quota gửi lại 5/giờ; thử trước 60s | 429, resend giữ attempts/lockedUntil | Tích hợp; chụp counter/time, không code/hash |
-| role admin từ body | Register với role admin và CAPTCHA đúng | DB role viewer | Tích hợp; chỉ chụp role/status |
-| Kích hoạt không auto-login | GET dishes sau activate | 303 login | Tích hợp; Network |
-| OTP dùng làm password | POST login với OTP thay password | INVALID_CREDENTIALS | Tích hợp; che OTP |
-| Activate đồng thời | Hai POST cùng OTP | Chỉ một 303 thành công | Tích hợp; không chụp body OTP |
-| Register thiếu/sai CAPTCHA | POST register không/ sai mã | CAPTCHA_FAILED, không user/mail | Tích hợp; counter user/mail; che nội dung mã |
-| CAPTCHA dùng lại/quá hạn/khác phiên/purpose | Giữ challenge, đổi jar/purpose hoặc tiêu thụ lại | CAPTCHA_FAILED | Tích hợp; che answer/challenge session metadata |
-| CAPTCHA không phân biệt hoa/thường | Gửi đáp án chữ hoa từ mã server | CAPTCHA đúng được chấp nhận | Tích hợp; không log đáp án |
-| Login bỏ CAPTCHA sau 3 sai | Gửi password đúng, thiếu CAPTCHA | CAPTCHA_FAILED trước nhánh verify password | Tích hợp + đọc thứ tự code; fail counter vẫn 3 |
-| CAPTCHA đúng, password sai | Giải mã mới cho từng lần sai tiếp | Counter tăng, không reset | Tích hợp; che mã/password |
-| 10 lần sai, gửi đúng | Gửi đủ 10; sau đó gửi đúng password | 429 dù đổi jar/cookie | Tích hợp; DB RateLimit.lockedUntil |
-| IP quota độc lập | Chuẩn bị row ở ngưỡng trong schema riêng | login/register/forgot/activate/cấp CAPTCHA bị 429 | Tích hợp; che email trong key khi chụp |
-| Mọi CRUD chưa login | Curl GET/new/edit/delete/POST/override không cookie | 303 /login; không đổi dữ liệu CRUD | Tích hợp; browser cũng kiểm tra cả 2 list |
-| Login active đúng | GET login, POST với CSRF + password | 303 dishes; Set-Cookie sid mới; vào CRUD | Tích hợp + browser; che toàn bộ giá trị sid và password |
-| Sai email / password | POST cả hai nhánh | Cùng thông báo chung INVALID_CREDENTIALS | Tích hợp; chỉ chụp thông báo |
-| Session fixation | So sid trước/sau login trong RAM | Khác nhau | Tích hợp; không chụp hai giá trị |
-| Restart server | Giữ jar, tắt/bật server test thật rồi GET dishes | Vẫn 200 qua DB store | Tích hợp; không dùng MemoryStore |
-| Logout và replay sid | POST logout + CSRF, dùng jar cũ | Row session xóa, replay 303; stale set không hồi sinh | Tích hợp; che cookie |
-| CSRF/Origin auth/CRUD/logout | POST thiếu token hoặc Origin khác | 403 khi đã có session hợp lệ | Tích hợp; không chụp token |
-| Cookie flags | Quan sát Set-Cookie đã che trong Network/Application | HttpOnly, SameSite Lax, Path=/, không Domain | HTTP thật trong suite; Secure production được kiểm tra cấu hình, chưa nghiệm thu TLS/reverse proxy thật |
-| Idle/absolute/status | Dữ liệu session test quá hạn, user không active | 303 ở server | Tích hợp; che serialized session |
-| Forgot email có/không | POST forgot, so status/thông báo | Cùng 303 /forgot/sent và nội dung | Tích hợp; không chụp email thật |
-| Forgot vượt quota | Counter email/IP vượt ngưỡng | 429 | Tích hợp |
-| Reset token cũ/hết hạn/đã dùng | Tạo hai yêu cầu forgot; thử token cũ/hết hạn/used | INVALID_RESET; password không bị thay bằng token lỗi | Tích hợp; che URL token và body |
-| GET reset hợp lệ | GET link rồi đọc row trước/sau | Form hiện, usedAt vẫn null, no-referrer | Tích hợp; che URL/hidden token |
-| Reset thành công | POST token + password mới | 303 login, hash đổi, mọi Session.userId xóa | Tích hợp; che password/hash/token |
-| Reset pending / token sai route | Reset pending; dùng token ở login | Không active/auto-login; token không thành password | Tích hợp; che payload |
-| Reset đồng thời | Hai POST cùng token | Chỉ một thành công; mail không chứa password | Tích hợp; SMTP message chỉ ở RAM |
-| CRUD sau login | Tạo/sửa/xem/xác nhận/xóa ba thực thể trong schema test | PRG 303, validation 400, missing 404, relation guard giữ nguyên | Tích hợp; không chạy ghi trên data thật |
-| Phân trang sau login | GET list/filter/sort/pageSize, browser native forms | Giữ đúng page/filter/sort; invalid 400, vượt trang 303 | Tích hợp + browser thật; ảnh dùng database nhóm |
+- UI: chụp thông báo/mã lỗi, form/trang đích, viewport1440/375 khi phù hợp; che input email/password/OTP/CAPTCHA và navbar email.
+- Network: method, pathname/query đã che, status, redirect; tuyệt đối che token URL, request payload, CSRF/challengeId/OTP/password và Set-Cookie value. Giữ cookie flags nhìn được.
+- Application/Cookies: che toàn bộ Value, chỉ giữ name/Path/SameSite/HttpOnly/Secure/expiry; không export storageState/HAR/trace.
+- DB: chỉ trạng thái user/verified flag, hạn, usedAt, attempts/lockedUntil/sendCount, session existence/expiry và counter đã che key. Không chụp SID, session.data, passwordHash, OTP/token hash, CAPTCHA answer hoặc địa chỉ/tài khoản thật.
+- Sơ đồ: nhóm tự vẽ register+CAPTCHA, login+brute force, logout và forgot/reset, tự giải thích theo slide62. [flows](flows.md) là bản tham khảo, chưa phải xác nhận nhóm đã làm.
+- Lỗi agent: dùng [native reset403 trước/sau](BUG_RESET_BROWSER_403.md), không cố ý tạo lỗi ứng dụng mới. Không dùng cleanup smoke hạ tầng thay hồ sơ lỗi này.
 
-## Nghiệm thu browser và ảnh
+## Hồi quy Block5 và giới hạn
 
-Các ảnh `*-real-*.png` trong `docs/evidence/pagination-browser/` đều dùng database ứng dụng thật; tên “B7 Seed ...” có thể là dữ liệu đã có trong DB nhóm, **không phải mock của script preview**. Ảnh che email bằng ô màu; không ghi storageState/cookie/trace chứa credential.
+A15 thực hiện tạo/sửa/chi tiết/xác nhận/xóa cả ba thực thể trong schema riêng, validation400, missing404, relation guard và303 PRG. Hai list giữ q/filter/sort/pageSize/page/link. Browser kiểm JSon/off, keyboard Tab/Enter, Back/Forward, viewport375 không tràn ngang document, bảng admin cuộn trong container. Không có request CRUD ghi lên dữ liệu nhà hàng của nhóm.
 
-- Desktop/375px, JS bật/tắt: form/list/navigation trong viewport; document/body không tràn ngang. Admin table có scrollWidth lớn hơn clientWidth và scrollLeft thay đổi trong container, window.scrollX vẫn 0.
-- Native no-JS: tìm, bộ lọc quản trị, sort, pageSize, next; link giữ điều kiện; tìm mới/đổi size về trang 1.
-- Bàn phím: Tab tới input/select/submit/pageLink; focus-visible có outline/shadow, focus trong viewport; Enter thực hiện tìm/gửi form/link. Disabled là span, không href/tabindex.
-- Back/Forward: hai bước Back và hai bước Forward, so URL + IDs dữ liệu + tổng + form fields. Đã sửa autocomplete off để browser không đưa giá trị form đã nhập vào URL cũ; CSS scroll-margin/reduced-motion giữ focus nhìn thấy.
-- Mỗi layout có ảnh `*-form.png` và `*-pagination.png`; keyboard có `*-keyboard.png`. Kết luận cuối và phiên bản Chrome/Playwright nằm trong results.json.
-
-## Chưa xác minh ngoài môi trường test
-
-- TLS/reverse proxy/secure cookie trên deployment production thật; cần nghiệm thu với APP_ORIGIN HTTPS và TRUST_PROXY đúng hạ tầng.
-- Giao nhận email tới inbox SMTP của nhóm: luồng email được kiểm tra qua SMTP TCP cục bộ; kết nối Ethereal fallback đã verify thành công nhưng không gửi email thật trong smoke check.
-- Không benchmark chứng minh timing không thể phân biệt trên mạng; đã rà chi phí Argon2, hash giả, floor phản hồi và mail không chặn.
-- Race/expiry dùng transaction và metadata test trên PostgreSQL; chưa chạy trên provider DB khác.
+Secure cookie trên HTTPS/reverse proxy deployment, multi-instance/load balancer tải lớn, provider DB khác, timing production và screen reader/OCR chưa được nghiệm thu. GET metadata và timing không được chuyển PASS chỉ vì các suite chạy đạt. Inbox OTP thật đã được người dùng xác nhận; inbox reset/thông báo đổi mật khẩu chưa xác nhận ngoài SMTP local.

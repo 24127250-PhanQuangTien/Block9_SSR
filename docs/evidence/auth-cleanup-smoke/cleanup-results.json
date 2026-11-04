@@ -1,0 +1,7 @@
+{
+  "purpose": "Expected missing Playwright module: validate final harness cleanup after setup failure; not an auth acceptance result",
+  "status": "PASS",
+  "expectedSetupFailure": true,
+  "isolatedSchemaRemoved": true,
+  "completedAt": "2026-11-04T14:59:09.621Z"
+}

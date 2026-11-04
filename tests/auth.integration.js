@@ -1,6 +1,11 @@
 // Real Prisma + real server processes + Argon2 + DB sessions + local SMTP.
 // All writes are confined to a fresh random PostgreSQL schema, never the app schema.
 // No security middleware is replaced or disabled. Credentials/messages stay in RAM.
+if (process.argv.includes("--browser-only") && !process.argv.includes("--browser"))
+{
+  console.error("BROWSER_FLAG_REQUIRED: dùng --browser cùng --browser-only; chưa chạy kiểm thử.");
+  process.exit(1);
+}
 require("dotenv").config();
 const assert = require("node:assert/strict");
 const { once } = require("node:events");
@@ -28,6 +33,7 @@ const evidence = path.resolve(process.env.AUTH_EVIDENCE_DIR || (browserOnly ? "d
 const results = { startedAt: new Date().toISOString(), database: "real isolated PostgreSQL schema", securityMocks: false, checks: [], requests: [], writesToApplicationSchema: 0 };
 const inbox = [];
 let child, smtp, stage = "setup", created = false;
+const serverProcesses = new Set();
 const password = "Auth8-" + security.random(18);
 let account, pending, pendingOTP;
 let lastObservation, browserEvidence;
@@ -59,11 +65,16 @@ function assertWriteForms(html) {
   for (const [form] of forms) assert.ok(hidden(form, "_csrf"), "Every POST form must carry its own CSRF token");
 }
 class Client {
-  constructor() { this.cookie = ""; this.csrf = ""; }
+  constructor(requestBase = base)
+  {
+    this.requestBase = requestBase;
+    this.cookie = "";
+    this.csrf = "";
+  }
   async request(route, values, options = {}) {
     const method = options.method || (values === undefined ? "GET" : "POST");
     const payload = values === undefined ? undefined : { ...(options.noCsrf ? {} : { _csrf: this.csrf }), ...values };
-    const response = await fetch(base + route, { method, redirect: "manual", signal: AbortSignal.timeout(30000),
+    const response = await fetch(this.requestBase + route, { method, redirect: "manual", signal: AbortSignal.timeout(30000),
       headers: { Accept: "text/html", ...(this.cookie ? { Cookie: this.cookie } : {}), ...(method === "POST" ? { Origin: base } : {}), ...options.headers },
       ...(payload ? { body: new URLSearchParams(payload) } : {}) });
     const cookies = response.headers.getSetCookie();
@@ -71,7 +82,7 @@ class Client {
     const html = await response.text();
     const token = hidden(html, "_csrf");
     if (token) this.csrf = token;
-    results.requests.push({ check: stage, method, url: safeURL(route, base), status: response.status, location: response.headers.get("location") ? safeURL(response.headers.get("location"), base) : null, setCookie: cookies.filter(item => item.startsWith("sid=")).map(cookieFlags) });
+    results.requests.push({ check: stage, ...(this.requestBase === base ? {} : { instance: "secondary" }), method, url: safeURL(route, base), status: response.status, location: response.headers.get("location") ? safeURL(response.headers.get("location"), base) : null, setCookie: cookies.filter(item => item.startsWith("sid=")).map(cookieFlags) });
     lastObservation = { cookie: this.cookie, route, method };
     return { status: response.status, location: response.headers.get("location"), html, cookies, referrer: response.headers.get("referrer-policy") };
   }
@@ -111,17 +122,39 @@ async function message(email, after = 0, predicate = () => true) {
   throw new Error("SMTP_MESSAGE_NOT_RECEIVED");
 }
 async function clearLimits() { await db.rateLimit.deleteMany(); }
-async function startServer() {
-  child = spawn(process.execPath, ["src/server.js"], { env: testEnv, stdio: "ignore" });
-  for (let i = 0; i < 100; i++) {
-    if (child.exitCode !== null) throw new Error("TEST_SERVER_EXITED");
-    try { const response = await fetch(base + "/login", { redirect: "manual" }); if (response.status === 200) return; } catch {}
+async function launchServer(env, requestBase)
+{
+  const server = spawn(process.execPath, ["src/server.js"], { env, stdio: "ignore" });
+  serverProcesses.add(server);
+  for (let i = 0; i < 100; i++)
+  {
+    if (server.exitCode !== null) throw new Error("TEST_SERVER_EXITED");
+    try
+    {
+      const response = await fetch(requestBase + "/login", { redirect: "manual", signal: AbortSignal.timeout(2000) });
+      if (response.status === 200) return server;
+    }
+    catch {}
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   throw new Error("TEST_SERVER_START_TIMEOUT");
 }
+async function startServer()
+{
+  child = await launchServer(testEnv, base);
+}
+async function stopProcess(server)
+{
+  if (server && server.exitCode === null)
+  {
+    const ended = once(server, "exit");
+    server.kill();
+    await ended;
+  }
+  serverProcesses.delete(server);
+}
 async function stopServer() {
-  if (child && child.exitCode === null) { const ended = once(child, "exit"); child.kill(); await ended; }
+  await stopProcess(child);
   child = null;
 }
 
@@ -133,7 +166,9 @@ async function main() {
     probe.listen(Number(testPort), () => probe.close(resolve));
   });
   assert.match(schema, /^auth_test_[a-f0-9]{24}$/);
-  cli(["migrate", "deploy"]); created = true;
+  // A failed migration can already have created part of the isolated schema.
+  created = true;
+  cli(["migrate", "deploy"]);
   smtp = net.createServer(socket => {
     socket.setEncoding("binary"); socket.write("220 localhost test SMTP\r\n");
     let buffered = "", data = false, recipient = "";
@@ -527,6 +562,74 @@ async function main() {
     }
     results.forgotTiming = { samples: observations, conclusion: "Descriptive observations only; not proof of constant-time behaviour or a production timing audit." };
   });
+  await check("two server processes share sessions, login counters, logout and reset revocation", async () =>
+  {
+    await clearLimits();
+    const port = await new Promise((resolve, reject) =>
+    {
+      const probe = net.createServer();
+      probe.once("error", reject);
+      probe.listen(0, "127.0.0.1", () =>
+      {
+        const assigned = probe.address().port;
+        probe.close(() => resolve(assigned));
+      });
+    });
+    const peerBase = `http://127.0.0.1:${port}`;
+    const peer = await launchServer({ ...testEnv, PORT: String(port) }, peerBase);
+    try
+    {
+      const first = new Client();
+      assert.equal((await first.login()).status, 303);
+      const originalCookie = first.cookie;
+      const second = new Client(peerBase);
+      second.cookie = originalCookie;
+      assert.equal((await second.get("/dishes")).status, 200);
+      assert.equal((await second.post("/logout", {})).status, 303);
+      assert.equal(await db.session.count({ where: { sid: sessionId(originalCookie) } }), 0);
+      first.cookie = originalCookie;
+      assert.equal((await first.get("/dishes")).status, 303);
+
+      const probes = [new Client(), new Client(peerBase)];
+      for (const client of probes) await client.get("/login");
+      for (let attempt = 0; attempt < policy.loginCaptchaAfter; attempt++)
+      {
+        const response = await probes[attempt % 2].post("/login", { email: account.email, password: "Wrong8-" + security.random() });
+        assert.match(response.html, /INVALID_CREDENTIALS/);
+      }
+      const key = `login:email:${account.email}`;
+      assert.equal((await db.rateLimit.findUnique({ where: { key } })).count, policy.loginCaptchaAfter);
+      for (const client of probes)
+      {
+        assert.match((await client.post("/login", { email: account.email, password })).html, /CAPTCHA_FAILED/);
+      }
+      assert.equal((await db.rateLimit.findUnique({ where: { key } })).count, policy.loginCaptchaAfter);
+
+      await clearLimits();
+      const sessions = [new Client(), new Client(peerBase)];
+      for (const client of sessions) assert.equal((await client.login()).status, 303);
+      const oldCookies = sessions.map(client => client.cookie);
+      const beforeMail = inbox.length;
+      const resetter = new Client(peerBase);
+      await resetter.get("/forgot");
+      assert.equal((await resetter.post("/forgot", { email: account.email })).status, 303);
+      const mailBody = await message(account.email, beforeMail, value => value.includes("/reset?token="));
+      const token = mailBody.match(/token=([A-Za-z0-9_-]{43})/)[1];
+      assert.equal((await resetter.get("/reset?token=" + token)).status, 200);
+      assert.equal((await resetter.post("/reset", { token, password })).status, 303);
+      assert.equal(await db.session.count({ where: { userId: account.id } }), 0);
+      for (let index = 0; index < sessions.length; index++)
+      {
+        sessions[index].cookie = oldCookies[index];
+        assert.equal((await sessions[index].get("/dishes")).status, 303);
+      }
+      results.multiInstance = { processes: 2, sharedSession: true, sharedLoginCounter: true, logoutRevokedAcrossProcesses: true, resetRevokedAcrossProcesses: true, transport: "local HTTP; shared configured application origin", deploymentVerified: false };
+    }
+    finally
+    {
+      await stopProcess(peer);
+    }
+  });
   if (browserEvidence) {
     stage = "native browser auth acceptance";
     if (browserOnly) await db.dish.createMany({ data: Array.from({ length: 31 }, (_, i) => ({ name: "Phở thử " + i, price: i % 3 * 1000, category: "Món thử", available: true })) });
@@ -539,17 +642,36 @@ main().catch(error => {
   results.checks.push({ name: stage, status: "FAIL", kind: error.name, code: /^P\d{4}$/.test(error.code || "") ? error.code : undefined });
   console.error(JSON.stringify({ check: stage, status: "FAIL", kind: error.name, code: /^P\d{4}$/.test(error.code || "") ? error.code : undefined, details: "withheld to protect credentials and tokens" }));
   process.exitCode = 1;
-}).finally(async () => {
-  if (browserEvidence) await browserEvidence.close();
-  await stopServer();
-  if (smtp) await new Promise(resolve => smtp.close(resolve));
-  let removed = false;
-  if (created && /^auth_test_[a-f0-9]{24}$/.test(schema)) {
-    // PostgreSQL-only TEST HARNESS cleanup. No raw SQL exists in auth runtime.
-    try { await db.$executeRawUnsafe(`DROP SCHEMA "${schema}" CASCADE`); removed = true; }
-    catch { console.error(JSON.stringify({ isolatedCleanup: "FAILED", schema })); process.exitCode = 1; }
+}).finally(async () =>
+{
+  async function cleanupStep(name, work)
+  {
+    try
+    {
+      await work();
+    }
+    catch
+    {
+      console.error(JSON.stringify({ cleanup: name, status: "FAIL", details: "withheld to protect credentials and tokens" }));
+      process.exitCode = 1;
+    }
   }
-  await db.$disconnect();
+  // A browser/process cleanup error must never skip the database cleanup.
+  if (browserEvidence) await cleanupStep("browser", () => browserEvidence.close());
+  for (const server of [...serverProcesses]) await cleanupStep("server", () => stopProcess(server));
+  child = null;
+  if (smtp) await cleanupStep("SMTP", () => new Promise((resolve, reject) => smtp.close(error => error ? reject(error) : resolve())));
+  let removed = false;
+  if (created && /^auth_test_[a-f0-9]{24}$/.test(schema))
+  {
+    // PostgreSQL-only TEST HARNESS cleanup. No raw SQL exists in auth runtime.
+    await cleanupStep("isolated schema", async () =>
+    {
+      await db.$executeRawUnsafe(`DROP SCHEMA IF EXISTS "${schema}" CASCADE`);
+      removed = true;
+    });
+  }
+  await cleanupStep("database disconnect", () => db.$disconnect());
   results.status = process.exitCode ? "FAIL" : "PASS";
   results.completedAt = new Date().toISOString();
   await fs.mkdir(evidence, { recursive: true });

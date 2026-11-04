@@ -1,0 +1,10 @@
+{
+  "command": "npm.cmd test",
+  "status": "PASS",
+  "tests": 24,
+  "pass": 24,
+  "fail": 0,
+  "skipped": 0,
+  "scope": "offline persistence fixtures; real application auth/crypto/CSRF/guard",
+  "recordedAt": "2026-11-04T15:52:37.099Z"
+}

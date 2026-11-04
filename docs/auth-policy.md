@@ -2,7 +2,7 @@
 
 ## Khảo sát trước triển khai
 
-- Nền tích hợp: `feat/backport-block7-pagination-ssr`, commit nền `2220580234324fd75becd06c612ee5c40a627252`; giữ mọi thay đổi phân trang chưa commit.
+- Nền tích hợp ban đầu: `feat/backport-block7-pagination-ssr`, commit nền `2220580234324fd75becd06c612ee5c40a627252`. Source hiện được duy trì trên main, giữ CRUD/phân trang SSR; kết quả hiện tại xem FINAL_ACCEPTANCE và audit.
 - Express 4, Node.js CommonJS, EJS; không React/SPA, API JSON hoặc Block9.
 - Prisma 5, provider PostgreSQL, cấu hình do `dotenv` tự nạp trong server; không mở/in `.env` hay credential.
 - CRUD đang có: `/dishes`, `/dishes/:id`; `/admin/dishes`, `/admin/chefs`, `/admin/ingredients` với new/edit/delete và POST/PATCH/DELETE.
@@ -48,6 +48,7 @@ Các giá trị tập trung tại `src/config/authPolicy.js`.
 - Dọn dữ liệu auth tạm khi khởi động và 15 phút/lần; không xóa challenge có lockedUntil còn hiệu lực. Timer không chạm bảng nhà hàng hoặc bảng session cũ.
 - SMTP cấu hình dùng Nodemailer; thiếu host dùng Ethereal. Chỉ log preview URL riêng tư, không log nội dung mail/OTP/reset token/password/cookie/CAPTCHA. Preview URL cũng cần giữ kín.
 - Production không fallback Ethereal khi thiếu SMTP_HOST, không log preview link. Development vẫn có preview đúng prompt; không công khai log đó. Gmail/App Password cấu hình qua `npm run mail:configure`; `mail:check` chỉ verify, không bảo đảm inbox delivery.
+- Người dùng đã xác nhận đăng ký/CAPTCHA/OTP qua email thật/kích hoạt/login và vào list thành công. Không thu credential hoặc OTP vào repo. Lỗi SMTP535 trước đó là lịch sử, không phải trạng thái mới của luồng này. Reset/thông báo đổi password qua inbox ngoài chưa xác nhận. Mail diagnostics chỉ log mã/status cho phép và hint cố định, không raw SMTP reply/error.message.
 - Resend: limiter public IP/email áp dụng cả email có/không tồn tại và trả429 khi hết quota. Backstop trên ActivationChallenge chỉ suppress mail, không làm lộ account qua status khi các window hai tầng lệch nhau. Register hợp lệ vẫn303 ở mọi nhánh như mục5.1 prompt; không coi đây là lỗi cần đổi riêng pending thành429.
 
 ## Route
@@ -64,3 +65,5 @@ Protected: `/`, `/admin` và toàn bộ router `/dishes`, `/admin/dishes`, `/adm
 4. `auth:configure` là lệnh cấp cấu hình local rõ ràng: chỉ append khóa còn thiếu, sinh secret/password bằng crypto; không ghi đè giá trị cũ và không in credential. Ứng dụng vẫn từ chối khởi động nếu thiếu/secret dưới 32 ký tự. `seed:auth` không đổi tài khoản đã có, không gọi seed cũ.
 5. Với forgot dùng PRG 303 `/forgot/sent`, nội dung chung cho email tồn tại/không tồn tại. Các lỗi auth validate nghiệp vụ là HTML 200 + data-error-code; rate 429, CSRF 403; không đổi status CRUD 400/404/500/303.
 6. Bộ test offline chỉ thay lớp persistence, vẫn gọi login/Argon2/CSRF/store/guard thật; không coi nó là bằng chứng DB. Suite auth tích hợp dùng DB schema riêng và SMTP TCP thật cục bộ, không mock quyết định bảo mật. Browser phân trang đăng nhập bằng seed thật của database ứng dụng, chỉ POST login và GET danh sách.
+7. Lượt tiếp tục sau83a2bc7 bổ sung A21: hai process Node thật dùng cùng schema riêng/secret cấu hình. Session và email fail counter được chia sẻ, logout/reset thu hồi cookie cũ xuyên process. Đây là HTTP local, gửi Origin cấu hình chung để mô phỏng hai backend; chưa phải nghiệm thu load balancer/TLS hoặc race xuyên instance. Bằng chứng ở `docs/evidence/auth-release-http/http-results.json`.
+8. Harness không cho `--browser-only` chạy riêng thiếu `--browser`, tránh báo PASS0 không có browser. Mọi server con được theo dõi để dọn, lỗi browser/server không ngăn bước xóa schema test; migration thất bại vẫn được thử cleanup với tên schema ngẫu nhiên có kiểm tra định dạng. Không áp dụng thao tác dọn này lên schema nhà hàng.

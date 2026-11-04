@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { mailDiagnostic } = require("./mailDiagnostics");
 let transportPromise;
 async function transport() {
   if (!transportPromise) transportPromise = (async () => {
@@ -18,7 +19,11 @@ function send(to, subject, text) {
       const result = await client.sendMail({ from: process.env.SMTP_FROM || "Restaurant <no-reply@example.test>", to, subject, text });
       const preview = nodemailer.getTestMessageUrl(result);
       if (preview && process.env.NODE_ENV !== "production") console.info("Email preview (chỉ dùng cục bộ, không chia sẻ):", preview);
-    } catch { console.error("Không gửi được email; kiểm tra cấu hình SMTP. Chi tiết nhạy cảm đã được giữ kín."); }
+    }
+    catch (error)
+    {
+      console.error("Không gửi được email:", mailDiagnostic(error));
+    }
   });
 }
 module.exports = { send, transport };

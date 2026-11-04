@@ -3,6 +3,41 @@ const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const { safeURL, cookieFlags } = require("./helpers/authEvidence");
 
+test("mail diagnostics identify authentication/network/TLS failures without copying provider secrets", () =>
+{
+  const { mailDiagnostic } = require("../src/services/mailDiagnostics");
+  const secret = "fixture-secret-never-publish";
+  for (const sample of [
+    { code: "EAUTH", responseCode: 535, expected: "authentication" },
+    { code: "ETIMEDOUT", expected: "connection" },
+    { code: "ENOTFOUND", expected: "connection" },
+    { code: "CERT_HAS_EXPIRED", expected: "tls" },
+    { code: secret, responseCode: secret, expected: "other" },
+  ])
+  {
+    const diagnostic = mailDiagnostic({ ...sample, message: secret, response: secret, command: secret, user: secret, pass: secret });
+    assert.equal(diagnostic.category, sample.expected);
+    assert.equal(JSON.stringify(diagnostic).includes(secret), false);
+    assert.equal(diagnostic.responseCode, sample.code === "EAUTH" ? 535 : null);
+  }
+  assert.equal(mailDiagnostic(null).category, "other");
+});
+
+test("browser-only without browser refuses to report a zero-check PASS before connecting to DB", () =>
+{
+  const { spawnSync } = require("node:child_process");
+  const result = spawnSync(process.execPath, ["tests/auth.integration.js", "--browser-only"],
+  {
+    cwd: require("node:path").resolve(__dirname, ".."),
+    env: { ...process.env, DATABASE_URL: "invalid-unused-fixture" },
+    encoding: "utf8",
+    timeout: 5000,
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /BROWSER_FLAG_REQUIRED/);
+  assert.equal(result.stdout, "");
+});
+
 test("production mail cannot create an Ethereal mailbox when SMTP is missing", () => {
   const script = `require('./src/services/mail').transport().then(()=>process.exit(2),error=>{if(!error.message.includes('SMTP_HOST'))process.exit(3);process.stdout.write('REFUSED');});`;
   const result = execFileSync(process.execPath, ["-e", script], { cwd: require("node:path").resolve(__dirname, ".."), env: { ...process.env, NODE_ENV: "production", SMTP_HOST: "", SMTP_USER: "", SMTP_PASS: "" }, encoding: "utf8", timeout: 5000 });

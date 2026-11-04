@@ -44,7 +44,7 @@ sequenceDiagram
  E-->>B: Clear cookie +303 login
 ```
 
-Vấn đáp ngắn: cookie chỉ giữ SID có chữ ký, DB mới giữ session; xóa cookie không tự xóa row DB. CAPTCHA tăng chi phí bot nhưng không thay counter/khóa. Pending bị chặn trước regenerate ở login và ở guard. Reset token chỉ lưu hash; POST reset xóa mọi session user. GET reset không claim token; POST native với no-referrer dùng ngoại lệ Origin:null + same-origin Fetch Metadata + CSRF. Public chỉ các trang auth/static; toàn CRUD phải login. Chi tiết bằng chứng tại VERIFY và HANDOFF.
+Vấn đáp ngắn: cookie chỉ giữ SID có chữ ký, DB mới giữ session; xóa cookie không tự xóa row DB. CAPTCHA tăng chi phí bot nhưng không thay counter/khóa. Pending bị chặn trước regenerate ở login và ở guard. Reset token chỉ lưu hash; POST reset xóa mọi session user. GET reset không claim token; POST native với no-referrer dùng ngoại lệ Origin:null + same-origin Fetch Metadata + CSRF. Public chỉ các trang auth/static; toàn CRUD phải login. Chi tiết bằng chứng tại [VERIFY](VERIFY.md) và [báo cáo audit](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md).
 
 ```mermaid
 flowchart TD

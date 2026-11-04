@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-11-04T14:58:59.913Z",
+  "database": "real isolated PostgreSQL schema",
+  "securityMocks": false,
+  "checks": [
+    {
+      "name": "setup",
+      "status": "FAIL",
+      "kind": "Error"
+    }
+  ],
+  "requests": [],
+  "writesToApplicationSchema": 0,
+  "status": "FAIL",
+  "completedAt": "2026-11-04T14:59:09.621Z",
+  "isolatedSchemaRemoved": true
+}

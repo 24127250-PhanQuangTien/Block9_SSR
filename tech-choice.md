@@ -14,7 +14,7 @@
 | Brute force | Helper RateLimit dùng Prisma | Bền vững qua restart và đổi cookie; transaction Serializable có retry hữu hạn, chi phí DB cao hơn memory |
 | Config | Giữ dotenv | Secret chỉ ở .env, .env.example là placeholder; không log giá trị |
 | Cookie parser | Không thêm | express-session tự đọc/kiểm tra signed cookie; tránh hai parser/secret không đồng nhất |
-| Browser acceptance | Playwright ở thư mục công cụ tạm, Chrome có sẵn | Không thêm dependency/lockfile browser vào ứng dụng; profile riêng, ảnh che email, chặn form ghi CRUD |
+| Browser acceptance | Playwright ở thư mục công cụ tạm, Chrome có sẵn | Không thêm dependency/lockfile browser vào ứng dụng; profile riêng, ảnh che email/input; auth ghi chỉ trong schema fixture riêng, không ghi CRUD dữ liệu nhóm |
 
 Mã auth không sử dụng SQL riêng PostgreSQL. Schema thực tế có cột UUID nên Prisma mapping giữ `@db.Uuid`; đổi DB cần đổi mapping/migration, không hứa migration PG chạy nguyên trên provider khác. SQL được Prisma sinh trong migration; SQL dọn schema chỉ thuộc test harness cô lập. Đây là sai khác cần biết khi đọc yêu cầu đa DB.
 
