@@ -9,7 +9,7 @@
   </div>
   <div class="page-hero__overlay"></div>
   <div class="container page-hero__content">
-    <h1 class="page-hero__title"><%= code %> - <%= code === 500 ? 'Lỗi Máy Chủ' : 'Không Tìm Thấy' %></h1>
+    <h1 class="page-hero__title"><%= code %> - <%= code === 500 ? 'Lỗi Máy Chủ' : code === 400 ? 'Yêu Cầu Không Hợp Lệ' : code === 403 ? 'Yêu Cầu Bị Từ Chối' : 'Không Tìm Thấy' %></h1>
     <p class="page-hero__breadcrumb"><a href="/dishes">Trang Chủ</a> &nbsp;/&nbsp; Lỗi</p>
   </div>
 </section>

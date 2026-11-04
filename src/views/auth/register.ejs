@@ -1,0 +1,12 @@
+<%- include('start') %>
+<form action="/register" method="POST" class="auth-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" autocomplete="email" value="<%= email %>" maxlength="254" required>
+  <label for="password">Mật khẩu</label>
+  <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" aria-describedby="password-policy" required>
+  <p id="password-policy">8–128 ký tự, có chữ và số.</p>
+  <%- include('captcha', { purpose: 'register' }) %>
+  <button class="btn btn--primary" type="submit">Đăng Ký</button>
+</form>
+<%- include('end') %>

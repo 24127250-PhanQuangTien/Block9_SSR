@@ -3,22 +3,24 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { once } = require("node:events");
+const authFixture = require("./helpers/authFixture");
 const prismaPath = require.resolve("../src/prisma");
 let reads = 0;
 const unavailable = async () => { reads++; throw new Error("PRIVATE database details password=secret"); };
-require.cache[prismaPath] = { id: prismaPath, filename: prismaPath, loaded: true, exports: {
+require.cache[prismaPath] = { id: prismaPath, filename: prismaPath, loaded: true, exports: authFixture.attachAuth({
   dish: { findMany: unavailable, findUnique: unavailable, count: unavailable },
   chef: { findMany: unavailable, findUnique: unavailable, count: unavailable },
   ingredient: { findMany: unavailable, findUnique: unavailable, count: unavailable },
   $transaction: unavailable,
-} };
+}) };
 const app = require("../src/app");
 
 test("invalid path IDs return 404 before Prisma; database errors render generic 500", async () => {
   const server = app.listen(0, "127.0.0.1");
   await once(server, "listening");
   const base = `http://127.0.0.1:${server.address().port}`;
-  const request = (path, method = "GET") => fetch(base + path, { method, redirect: "manual" });
+  const auth = await authFixture.login(base);
+  const request = (path, method = "GET") => fetch(base + path, { method, redirect: "manual", headers: { Cookie: auth.cookie, ...(!["GET", "HEAD"].includes(method) ? { "Content-Type": "application/x-www-form-urlencoded" } : {}) }, ...(!["GET", "HEAD"].includes(method) ? { body: new URLSearchParams({ _csrf: auth.csrf }) } : {}) });
   try {
     for (const id of ["abc", "0", "-1", "1.5", "2147483648", "1abc", "1e2", "0x1"]) {
       for (const area of ["dishes", "chefs", "ingredients"]) {

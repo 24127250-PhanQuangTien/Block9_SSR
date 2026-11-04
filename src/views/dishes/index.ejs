@@ -25,11 +25,13 @@
 
     <!-- Thanh Tìm Kiếm (Form GET chuẩn, không fetch/AJAX) -->
     <div class="search-section">
-      <form action="/dishes" method="GET" class="search-form">
+      <form action="/dishes" method="GET" autocomplete="off" class="search-form search-form--paginated">
+        <input type="hidden" name="page" value="1">
         <div class="search-input-group">
           <input 
             type="text" 
             name="q" 
+            aria-label="Tìm món ăn theo tên"
             value="<%= typeof q !== 'undefined' ? q : '' %>" 
             placeholder="Tìm món ăn theo tên (Ví dụ: Phở, Bún chả...)" 
             class="search-input"
@@ -38,14 +40,17 @@
             <a href="/dishes" class="btn-clear" title="Xóa bộ lọc">✕</a>
           <% } %>
         </div>
+        <div class="page-size-field"><%- include('../partials/pageSize') %></div>
         <button type="submit" class="btn btn--primary">Tìm Kiếm</button>
       </form>
       <% if (q) { %>
         <div class="search-status">
-          Kết quả tìm kiếm cho từ khóa: <strong>"<%= q %>"</strong> (tìm thấy <%= dishes.length %> món)
+          Kết quả tìm kiếm cho từ khóa: <strong>"<%= q %>"</strong> (tìm thấy <%= pagination.total %> món)
         </div>
       <% } %>
     </div>
+
+    <%- include('../partials/resultSummary') %>
 
     <!-- Danh Sách Món Ăn Phong Cách Bistro -->
     <% if (dishes.length === 0) { %>
@@ -98,6 +103,7 @@
         <% }); %>
       </div>
     <% } %>
+    <%- include('../partials/pagination') %>
   </div>
 </section>
 

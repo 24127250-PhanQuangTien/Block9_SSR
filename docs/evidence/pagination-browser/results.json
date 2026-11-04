@@ -1,0 +1,275 @@
+{
+  "data": "real database via npm start, real session login",
+  "origin": "http://localhost:3000",
+  "startedAt": "2026-11-03T07:57:06.559Z",
+  "checks": [
+    {
+      "name": "layout /dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "outside": [],
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "keyboard /dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": true,
+      "tabTargets": [
+        "input",
+        "pageSize",
+        "submit",
+        "pageLink"
+      ],
+      "enterSearch": true,
+      "enterSubmit": true,
+      "enterLink": true
+    },
+    {
+      "name": "history /dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": true,
+      "back": 2,
+      "forward": 2,
+      "urlRowsFormMatch": true
+    },
+    {
+      "name": "first-last /dishes",
+      "status": "PASS",
+      "totalPages": 102,
+      "disabledNotLinks": true
+    },
+    {
+      "name": "layout /admin/dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "outside": [],
+      "tableClient": 1150,
+      "tableScroll": 1423,
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "keyboard /admin/dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": true,
+      "tabTargets": [
+        "input",
+        "category",
+        "status",
+        "sort",
+        "pageSize",
+        "submit",
+        "pageLink"
+      ],
+      "enterSearch": true,
+      "enterSubmit": true,
+      "enterLink": true
+    },
+    {
+      "name": "history /admin/dishes 1440 js",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": true,
+      "back": 2,
+      "forward": 2,
+      "urlRowsFormMatch": true
+    },
+    {
+      "name": "first-last /admin/dishes",
+      "status": "PASS",
+      "totalPages": 102,
+      "disabledNotLinks": true
+    },
+    {
+      "name": "layout /dishes 1440 nojs",
+      "status": "PASS",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "outside": [],
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "native GET workflow /dishes 1440 nojs",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": false,
+      "filteredTotal": 127,
+      "pageSizeReset": true,
+      "newSearchReset": true
+    },
+    {
+      "name": "layout /admin/dishes 1440 nojs",
+      "status": "PASS",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "bodyWidth": 1440,
+      "outside": [],
+      "tableClient": 1150,
+      "tableScroll": 1423,
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "native GET workflow /admin/dishes 1440 nojs",
+      "status": "PASS",
+      "viewport": 1440,
+      "javaScriptEnabled": false,
+      "filteredTotal": 87,
+      "pageSizeReset": true,
+      "newSearchReset": true
+    },
+    {
+      "name": "layout /dishes 375 js",
+      "status": "PASS",
+      "viewport": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "outside": [],
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "layout /admin/dishes 375 js",
+      "status": "PASS",
+      "viewport": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "outside": [],
+      "tableClient": 325,
+      "tableScroll": 1373,
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "layout /dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "outside": [],
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "native GET workflow /dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "filteredTotal": 127,
+      "pageSizeReset": true,
+      "newSearchReset": true
+    },
+    {
+      "name": "keyboard /dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "tabTargets": [
+        "input",
+        "pageSize",
+        "submit",
+        "pageLink"
+      ],
+      "enterSearch": true,
+      "enterSubmit": true,
+      "enterLink": true
+    },
+    {
+      "name": "history /dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "back": 2,
+      "forward": 2,
+      "urlRowsFormMatch": true
+    },
+    {
+      "name": "layout /admin/dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "documentWidth": 375,
+      "bodyWidth": 375,
+      "outside": [],
+      "tableClient": 325,
+      "tableScroll": 1373,
+      "total": 1018,
+      "shown": 10
+    },
+    {
+      "name": "native GET workflow /admin/dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "filteredTotal": 87,
+      "pageSizeReset": true,
+      "newSearchReset": true
+    },
+    {
+      "name": "keyboard /admin/dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "tabTargets": [
+        "input",
+        "category",
+        "status",
+        "sort",
+        "pageSize",
+        "submit",
+        "pageLink"
+      ],
+      "enterSearch": true,
+      "enterSubmit": true,
+      "enterLink": true
+    },
+    {
+      "name": "history /admin/dishes 375 nojs",
+      "status": "PASS",
+      "viewport": 375,
+      "javaScriptEnabled": false,
+      "back": 2,
+      "forward": 2,
+      "urlRowsFormMatch": true
+    }
+  ],
+  "screenshots": [
+    "dishes-1440-js-real-form.png",
+    "dishes-1440-js-real-pagination.png",
+    "dishes-1440-js-real-keyboard.png",
+    "admin-dishes-1440-js-real-form.png",
+    "admin-dishes-1440-js-real-pagination.png",
+    "admin-dishes-1440-js-real-keyboard.png",
+    "dishes-1440-nojs-real-form.png",
+    "dishes-1440-nojs-real-pagination.png",
+    "admin-dishes-1440-nojs-real-form.png",
+    "admin-dishes-1440-nojs-real-pagination.png",
+    "dishes-375-js-real-form.png",
+    "dishes-375-js-real-pagination.png",
+    "admin-dishes-375-js-real-form.png",
+    "admin-dishes-375-js-real-pagination.png",
+    "dishes-375-nojs-real-form.png",
+    "dishes-375-nojs-real-pagination.png",
+    "dishes-375-nojs-real-keyboard.png",
+    "admin-dishes-375-nojs-real-form.png",
+    "admin-dishes-375-nojs-real-pagination.png",
+    "admin-dishes-375-nojs-real-keyboard.png"
+  ],
+  "blockedWrites": 0,
+  "blockedDocuments": 0,
+  "documentGets": 100,
+  "browser": "156.0.8078.74",
+  "playwright": "1.64.1",
+  "unauthenticated303": 8,
+  "completedAt": "2026-11-03T07:59:38.334Z",
+  "status": "PASS"
+}

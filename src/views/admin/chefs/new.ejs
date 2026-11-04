@@ -19,6 +19,7 @@
       <% } %>
 
       <form action="/admin/chefs" method="POST" class="standard-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label for="name" class="form-label required">Họ Và Tên Đầu Bếp:</label>
           <input 

@@ -1,5 +1,6 @@
 require("dotenv").config();
 const app = require("./app");
+require("./services/cleanup").startCleanup(require("./prisma"));
 
 const PORT = process.env.PORT || 3000;
 

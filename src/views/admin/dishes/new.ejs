@@ -20,6 +20,7 @@
 
       <!-- Form chuẩn POST, không dùng fetch/AJAX -->
       <form action="/admin/dishes" method="POST" class="standard-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label for="name" class="form-label required">Tên Món Ăn:</label>
           <input 

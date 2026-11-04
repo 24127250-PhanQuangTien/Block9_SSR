@@ -1,0 +1,32 @@
+<% if (pagination.total > 0) { %>
+  <nav class="pagination" aria-label="Phân trang món ăn">
+    <p class="pagination__status">Trang <%= pagination.page %> / <%= pagination.totalPages %></p>
+    <ul class="pagination__links">
+      <li>
+        <% if (pagination.page > 1) { %>
+          <a class="pagination__item" href="<%= pagination.url(pagination.page - 1) %>" rel="prev">Trước</a>
+        <% } else { %>
+          <span class="pagination__item" aria-disabled="true">Trước</span>
+        <% } %>
+      </li>
+      <% pagination.pages.forEach(function(number) { %>
+        <li>
+          <% if (number === null) { %>
+            <span class="pagination__gap" aria-hidden="true">…</span>
+          <% } else if (number === pagination.page) { %>
+            <span class="pagination__item" aria-current="page" aria-label="Trang <%= number %>"><%= number %></span>
+          <% } else { %>
+            <a class="pagination__item" href="<%= pagination.url(number) %>" aria-label="Trang <%= number %>"><%= number %></a>
+          <% } %>
+        </li>
+      <% }); %>
+      <li>
+        <% if (pagination.page < pagination.totalPages) { %>
+          <a class="pagination__item" href="<%= pagination.url(pagination.page + 1) %>" rel="next">Sau</a>
+        <% } else { %>
+          <span class="pagination__item" aria-disabled="true">Sau</span>
+        <% } %>
+      </li>
+    </ul>
+  </nav>
+<% } %>

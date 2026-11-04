@@ -1,0 +1,7 @@
+<%- include('../partials/header') %>
+<%- include('../partials/navbar') %>
+<section class="auth-section"><div class="auth-card">
+  <p class="auth-eyebrow">RESTORAN · Tài khoản</p>
+  <h1><%= title %></h1>
+  <% if (typeof message !== 'undefined' && message) { %><p class="auth-message" role="status"><%= message %></p><% } %>
+  <% if (typeof error !== 'undefined' && error) { %><p class="auth-error" role="alert" data-error-code="<%= typeof code !== 'undefined' && code ? code : 'VALIDATION_FAILED' %>"><%= error %></p><% } %>

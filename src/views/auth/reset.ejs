@@ -1,0 +1,9 @@
+<%- include('start') %>
+<% if (usable) { %>
+  <form action="/reset" method="POST" class="auth-form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="token" value="<%= token %>">
+    <label for="password">Mật khẩu mới</label><input id="password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required>
+    <p>8–128 ký tự, có chữ và số.</p><button type="submit" class="btn btn--primary">Đặt Lại Mật Khẩu</button>
+  </form>
+<% } else { %><p class="auth-error" data-error-code="INVALID_RESET">Liên kết không dùng được. Hãy yêu cầu hướng dẫn mới.</p><% } %>
+<%- include('end') %>

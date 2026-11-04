@@ -19,6 +19,7 @@
       <% } %>
 
       <form action="/admin/ingredients" method="POST" class="standard-form">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="form-group">
           <label for="name" class="form-label required">Tên Nguyên Liệu:</label>
           <input 

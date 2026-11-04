@@ -2,21 +2,29 @@ const express = require("express");
 const router = express.Router();
 const prisma = require("../prisma");
 const { parseValidId } = require("../validation");
+const { paginationRequest, makePagination } = require("../pagination");
 
 // 1. GET /dishes - Danh sách món ăn cho khách hàng (có tìm kiếm qua query `q`)
-router.get("/", async (req, res, next) => {
+router.get("/", paginationRequest, async (req, res, next) => {
   try {
     const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
 
+    const where = q
+      ? {
+          name: {
+            contains: q,
+            mode: "insensitive", // Tìm kiếm không phân biệt chữ hoa / thường
+          },
+        }
+      : {};
+    const total = await prisma.dish.count({ where });
+    const pagination = makePagination(res.locals.pageRequest, total, "/dishes", { q });
+    if (pagination.redirect) return res.redirect(303, pagination.redirect);
+
     const dishes = await prisma.dish.findMany({
-      where: q
-        ? {
-            name: {
-              contains: q,
-              mode: "insensitive", // Tìm kiếm không phân biệt chữ hoa / thường
-            },
-          }
-        : {},
+      where,
+      skip: res.locals.pageRequest.skip,
+      take: pagination.pageSize,
       include: {
         chef: true,
         ingredients: true,
@@ -28,6 +36,7 @@ router.get("/", async (req, res, next) => {
       title: "Thực Đơn Nhà Hàng",
       dishes,
       q,
+      pagination,
     });
   } catch (error) {
     next(error);

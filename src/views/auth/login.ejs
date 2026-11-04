@@ -1,0 +1,12 @@
+<%- include('start') %>
+<form action="/login" method="POST" class="auth-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label for="email">Email</label>
+  <input id="email" name="email" type="email" autocomplete="username" value="<%= email %>" maxlength="254" required>
+  <label for="password">Mật khẩu</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+  <%- include('captcha', { purpose: 'login' }) %>
+  <button class="btn btn--primary" type="submit">Đăng Nhập</button>
+</form>
+<% if (code === 'ACTIVATION_REQUIRED') { %><p><a href="/activate">Kích hoạt tài khoản</a></p><% } %>
+<%- include('end') %>

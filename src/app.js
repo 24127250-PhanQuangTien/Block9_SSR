@@ -1,6 +1,12 @@
 const express = require("express");
 const path = require("path");
 const methodOverride = require("method-override");
+const session = require("express-session");
+const prisma = require("./prisma");
+const { configuration, policy } = require("./config/authPolicy");
+const { PrismaSessionStore } = require("./services/sessionStore");
+const { prepare, csrf } = require("./middleware/csrf");
+const { requireLogin, cookieOptions } = require("./middleware/requireLogin");
 
 const dishesRouter = require("./routes/dishes");
 const adminDishesRouter = require("./routes/adminDishes");
@@ -8,6 +14,11 @@ const adminChefsRouter = require("./routes/adminChefs");
 const adminIngredientsRouter = require("./routes/adminIngredients");
 
 const app = express();
+const config = configuration();
+app.disable("x-powered-by");
+app.set("trust proxy", config.trustProxy);
+app.locals.currentUser = null;
+app.locals.csrfToken = "";
 
 // 1. Cấu hình EJS View Engine
 app.set("view engine", "ejs");
@@ -15,13 +26,25 @@ app.set("views", path.join(__dirname, "views"));
 
 // 2. Middlewares cốt lõi
 // Parse payload form-data (application/x-www-form-urlencoded)
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: "32kb" }));
 
 // Ghi đè HTTP method từ query string ?_method=PATCH|DELETE
 app.use(methodOverride("_method", { methods: ["POST"] }));
 
 // Phục vụ các file tĩnh (CSS, hình ảnh, favicon)
 app.use(express.static(path.join(__dirname, "../public")));
+app.use(session({
+  name: "sid", secret: config.secret, store: new PrismaSessionStore(prisma),
+  resave: false, saveUninitialized: false, rolling: true,
+  cookie: { ...cookieOptions(config), maxAge: policy.idle },
+}));
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Referrer-Policy", "same-origin");
+  next();
+});
+app.use(prepare);
 
 // 3. Middleware nhận diện chế độ Khách hàng (User) hay Quản trị (Admin)
 app.use((req, res, next) => {
@@ -31,6 +54,14 @@ app.use((req, res, next) => {
 });
 
 // 4. Đăng ký Routes
+app.use(require("./routes/auth")(prisma, config));
+// Guard before CSRF so EVERY unauthenticated CRUD request gets 303 /login,
+// including POST and method-override PATCH/DELETE without a token.
+app.use(["/dishes", "/admin"], requireLogin(prisma, config));
+app.use((req, res, next) => req.path === "/" ? requireLogin(prisma, config)(req, res, next) : next());
+// Also reject unsafe unknown methods/paths without CSRF. Public auth POSTs above
+// already validate their token; protected routes reach this only after the guard.
+app.use(csrf(config));
 // Trang chủ tự động chuyển về /dishes
 app.get("/", (req, res) => {
   res.redirect(303, "/dishes");

@@ -1,0 +1,7 @@
+<%- include('start') %>
+<form action="/forgot" method="POST" class="auth-form">
+  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <label for="email">Email</label><input id="email" name="email" type="email" value="<%= email %>" autocomplete="email" maxlength="254" required>
+  <button type="submit" class="btn btn--primary">Gửi Hướng Dẫn</button>
+</form>
+<%- include('end') %>

@@ -1,0 +1,5 @@
+<p class="pagination-summary">
+  Tổng kết quả: <strong><%= pagination.total %></strong> món.
+  Đang hiển thị <strong><%= dishes.length %></strong> món
+  <% if (pagination.total > 0) { %>(<%= pagination.from %>–<%= pagination.to %>)<% } %>.
+</p>

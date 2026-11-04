@@ -31,6 +31,7 @@
 
       <!-- Form xác nhận gửi DELETE qua Method Override -->
       <form action="/admin/dishes/<%= dish.id %>?_method=DELETE" method="POST" class="confirm-actions">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <button type="submit" class="btn btn--primary" style="background: var(--burgundy); color: #fff; width: 100%;">
           Xác Nhận Xóa Vĩnh Viễn
         </button>

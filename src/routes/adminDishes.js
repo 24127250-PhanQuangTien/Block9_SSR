@@ -4,9 +4,10 @@ const prisma = require("../prisma");
 
 const { parseValidId, validateDish } = require("../validation");
 const { notFound, isPrismaError, serializable } = require("../routeHelpers");
+const { paginationRequest, makePagination } = require("../pagination");
 
 // 1. GET /admin/dishes - Danh sách quản trị món ăn (có tìm kiếm, lọc phân loại & trạng thái)
-router.get("/", async (req, res, next) => {
+router.get("/", paginationRequest, async (req, res, next) => {
   try {
     const q = typeof req.query.q === "string" ? req.query.q.trim() : "";
     const category = typeof req.query.category === "string" ? req.query.category.trim() : "";
@@ -44,15 +45,22 @@ router.get("/", async (req, res, next) => {
     } else if (sort === "name") {
       orderBy = { name: "asc" };
     }
+    if (sort && Object.keys(orderBy)[0] !== "id") orderBy = [orderBy, { id: "asc" }];
+
+    const filters = { q, category, status, sort };
+    const total = await prisma.dish.count({ where });
+    const pagination = makePagination(res.locals.pageRequest, total, "/admin/dishes", filters);
+    if (pagination.redirect) return res.redirect(303, pagination.redirect);
 
     // Lấy danh sách món ăn kèm đầu bếp và nguyên liệu
-    const [dishes, totalCount, allCategoriesRaw] = await Promise.all([
+    const [dishes, allCategoriesRaw] = await Promise.all([
       prisma.dish.findMany({
         where,
         orderBy,
+        skip: res.locals.pageRequest.skip,
+        take: pagination.pageSize,
         include: { chef: true, ingredients: true },
       }),
-      prisma.dish.count(),
       prisma.dish.findMany({
         select: { category: true },
         distinct: ["category"],
@@ -68,9 +76,9 @@ router.get("/", async (req, res, next) => {
     res.status(200).render("admin/dishes/index", {
       title: "Quản Trị Món Ăn",
       dishes,
-      totalCount,
+      pagination,
       categories,
-      filters: { q, category, status, sort },
+      filters,
     });
   } catch (error) {
     next(error);

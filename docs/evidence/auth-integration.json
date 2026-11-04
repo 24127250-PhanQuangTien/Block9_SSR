@@ -1,0 +1,69 @@
+{
+  "database": "real isolated PostgreSQL schema",
+  "securityMocks": false,
+  "checks": [
+    {
+      "name": "mandatory secrets and cookie production policy",
+      "status": "PASS"
+    },
+    {
+      "name": "all unauthenticated CRUD GET/POST/override requests redirect 303 before writes",
+      "status": "PASS"
+    },
+    {
+      "name": "CSRF and Origin reject public auth submissions",
+      "status": "PASS"
+    },
+    {
+      "name": "register CAPTCHA missing/wrong/expired/reused/other-session/other-purpose is one-use and creates no account or mail",
+      "status": "PASS"
+    },
+    {
+      "name": "register normalization, role whitelist, Argon2id and pending password preservation",
+      "status": "PASS"
+    },
+    {
+      "name": "pending cannot login, OTP activation is atomic and does not auto-login",
+      "status": "PASS"
+    },
+    {
+      "name": "resent OTP rejects old code and accepts new code through HTTP",
+      "status": "PASS"
+    },
+    {
+      "name": "OTP resend cooldown, replacement, expiry, attempts and lock persist",
+      "status": "PASS"
+    },
+    {
+      "name": "login generic errors, server CAPTCHA threshold, persistent 10-failure lock and cookie rotation",
+      "status": "PASS"
+    },
+    {
+      "name": "DB session survives real server restart; logout and stale store writes cannot revive sid",
+      "status": "PASS"
+    },
+    {
+      "name": "idle, absolute expiry and inactive users are rejected server-side",
+      "status": "PASS"
+    },
+    {
+      "name": "forgot generic response, canonical reset origin, single token and read-only GET reset",
+      "status": "PASS"
+    },
+    {
+      "name": "reset is atomic, invalidates all sessions, cannot authenticate as token or activate pending",
+      "status": "PASS"
+    },
+    {
+      "name": "IP budgets are enforced independently of account and cookie",
+      "status": "PASS"
+    },
+    {
+      "name": "authenticated CRUD all three entities, CSRF, override, validation and pagination",
+      "status": "PASS"
+    }
+  ],
+  "writesToApplicationSchema": 0,
+  "status": "PASS",
+  "isolatedSchemaRemoved": true
+}

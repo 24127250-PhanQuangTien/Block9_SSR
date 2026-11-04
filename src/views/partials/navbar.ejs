@@ -1,4 +1,4 @@
-<nav class="navbar <%= typeof isAdmin !== 'undefined' && isAdmin ? 'navbar--admin' : '' %>">
+<nav class="navbar <%= typeof isAdmin !== 'undefined' && isAdmin ? 'navbar--admin' : '' %> <%= typeof currentUser !== 'undefined' && currentUser ? 'navbar--authenticated' : '' %>">
   <div class="container navbar__inner">
     <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
       <!-- Logo và Thương hiệu phía Quản Trị -->
@@ -28,3 +28,12 @@
   </div>
 </nav>
 <main class="main-content">
+<% if (typeof currentUser !== 'undefined' && currentUser) { %>
+  <div class="auth-account" aria-label="Tài khoản đang đăng nhập">
+    <span class="auth-account__email"><%= currentUser.email %></span>
+    <form action="/logout" method="POST">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button type="submit" class="btn auth-account__logout">Đăng Xuất</button>
+    </form>
+  </div>
+<% } %>

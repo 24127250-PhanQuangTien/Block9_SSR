@@ -1,0 +1,10 @@
+<label for="page-size">Món mỗi trang</label>
+<select id="page-size" name="pageSize">
+  <% const sizes = [10, 20, 50]; %>
+  <% if (!sizes.includes(pagination.pageSize)) { %>
+    <option value="<%= pagination.pageSize %>" selected><%= pagination.pageSize %></option>
+  <% } %>
+  <% sizes.forEach(function(size) { %>
+    <option value="<%= size %>" <%= pagination.pageSize === size ? 'selected' : '' %>><%= size %></option>
+  <% }); %>
+</select>

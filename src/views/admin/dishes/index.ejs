@@ -15,7 +15,8 @@
 
     <!-- Thanh Tìm Kiếm + Bộ Lọc Đa Tiêu Chí (SSR Form GET chuẩn, không AJAX) -->
     <div class="admin-filter-card">
-      <form action="/admin/dishes" method="GET" class="admin-filter-form">
+      <form action="/admin/dishes" method="GET" autocomplete="off" class="admin-filter-form admin-filter-form--paginated">
+        <input type="hidden" name="page" value="1">
         <!-- 1. Ô tìm kiếm từ khóa -->
         <div class="admin-filter-field admin-filter-field--search">
           <label class="admin-filter-label" for="filter-q">Tìm kiếm từ khóa</label>
@@ -66,6 +67,8 @@
           </select>
         </div>
 
+        <div class="admin-filter-field page-size-field"><%- include('../../partials/pageSize') %></div>
+
         <!-- Nút Thực thi & Xóa lọc -->
         <div class="admin-filter-buttons">
           <button type="submit" class="admin-filter-btn btn--primary">🔍 Lọc Dữ Liệu</button>
@@ -76,6 +79,8 @@
         </div>
       </form>
     </div>
+
+    <%- include('../../partials/resultSummary') %>
 
     <!-- Bảng danh sách món ăn -->
     <div class="admin-table-card">
@@ -164,6 +169,7 @@
         </table>
       </div>
     </div>
+    <%- include('../../partials/pagination') %>
   </div>
 </section>
 
