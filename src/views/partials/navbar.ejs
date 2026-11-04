@@ -1,4 +1,4 @@
-<nav class="navbar <%= typeof isAdmin !== 'undefined' && isAdmin ? 'navbar--admin' : '' %> <%= typeof currentUser !== 'undefined' && currentUser ? 'navbar--authenticated' : '' %>">
+<nav class="navbar <%= typeof isAdmin !== 'undefined' && isAdmin ? 'navbar--admin' : '' %> <%= typeof currentUser !== 'undefined' && currentUser ? 'navbar--authenticated' : '' %> <%= typeof solidNavbar !== 'undefined' && solidNavbar ? 'navbar--auth' : '' %>">
   <div class="container navbar__inner">
     <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
       <!-- Logo và Thương hiệu phía Quản Trị -->

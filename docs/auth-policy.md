@@ -43,9 +43,12 @@ Các giá trị tập trung tại `src/config/authPolicy.js`.
 - Session store kế thừa Store, có get/set/destroy/touch và cột userId. Hết expiresAt coi như không tồn tại. Chỉ sid vừa regenerate ở login được tạo phiên authenticated mới; request cũ chỉ update row còn tồn tại, không thể hồi sinh sid sau logout. authVersion đối chiếu User.updatedAt ngăn request cũ tạo lại phiên sau đổi password.
 - Reset giữ status pending/active hiện có, xóa tất cả session user và invalid token chưa dùng trong transaction; không tự đăng nhập. GET reset chỉ kiểm tra token, không cập nhật usedAt/password và đặt Referrer-Policy=no-referrer.
 - CSRF synchronizer token trong session, timingSafeEqual và Origin đúng APP_ORIGIN khi có. Mọi form POST auth/CRUD/logout có `_csrf`; GET tìm kiếm không mang CSRF vào URL. requireLogin đứng trước CSRF của CRUD: khách chưa đăng nhập luôn 303 `/login`, kể cả POST không token.
+- Ngoại lệ browser reset: `no-referrer` làm Chrome gửi Origin:null khi submit native form. Chỉ POST `/reset` có `Sec-Fetch-Site:same-origin` và token CSRF đúng được chấp nhận; null ở route khác, thiếu metadata/cross-site hoặc token sai vẫn403. Không bỏ CSRF/đổi no-referrer; đây là sai khác có chủ đích so với kiểm Origin tuyệt đối. Xem `docs/BUG_RESET_BROWSER_403.md`.
 - Role chỉ có default viewer, chưa phân quyền. Không MFA/JWT/Block9.
 - Dọn dữ liệu auth tạm khi khởi động và 15 phút/lần; không xóa challenge có lockedUntil còn hiệu lực. Timer không chạm bảng nhà hàng hoặc bảng session cũ.
 - SMTP cấu hình dùng Nodemailer; thiếu host dùng Ethereal. Chỉ log preview URL riêng tư, không log nội dung mail/OTP/reset token/password/cookie/CAPTCHA. Preview URL cũng cần giữ kín.
+- Production không fallback Ethereal khi thiếu SMTP_HOST, không log preview link. Development vẫn có preview đúng prompt; không công khai log đó. Gmail/App Password cấu hình qua `npm run mail:configure`; `mail:check` chỉ verify, không bảo đảm inbox delivery.
+- Resend: limiter public IP/email áp dụng cả email có/không tồn tại và trả429 khi hết quota. Backstop trên ActivationChallenge chỉ suppress mail, không làm lộ account qua status khi các window hai tầng lệch nhau. Register hợp lệ vẫn303 ở mọi nhánh như mục5.1 prompt; không coi đây là lỗi cần đổi riêng pending thành429.
 
 ## Route
 

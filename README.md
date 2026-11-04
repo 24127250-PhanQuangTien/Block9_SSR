@@ -1,5 +1,15 @@
 # Restaurant SSR
 
+**Chuyển máy/tiếp tục công việc:** đọc [docs/HANDOFF_BLOCK8.md](docs/HANDOFF_BLOCK8.md). Yêu cầu gốc được lưu tại [docs/requirements](docs/requirements/); không cần mang theo các prompt chỉ nằm ngoài repository.
+
+Kết quả đợt bàn giao: **22/22 offline,20/20 nhóm HTTP thật,4/4 native Chrome,4/4 navbar**; schema test được dọn. Đọc [báo cáo sau khắc phục](docs/BLOCK8_FINAL_ACCEPTANCE.md) để biết32/34 tiêu chíPASS và các giới hạn còn lại. Bản audit30/34 bên dưới là lịch sử trước sửa.
+
+**OTP không tới inbox?** Nếu thiếu SMTP_HOST, Ethereal chỉ giữ thư thử. Xem [cấu hình Gmail/SMTP thật](docs/MAIL_SETUP.md); chạy `npm.cmd run mail:configure`, `npm.cmd run mail:check` rồi restart server. Không đưa `.env` vào Git.
+
+**Nghiệm thu bổ sung:** `npm.cmd test` có22 ca offline; `npm.cmd run test:auth` có20 nhóm HTTP/Prisma thật trong schema tạm. Thêm `-- --browser` để chạy cùng Chrome; hoặc `npm.cmd run test:auth -- --browser --browser-only` để chỉ kiểm native auth desktop/375px, JSon/off và pagination sau login trong schema tạm. Playwright ở thư mục công cụ tạm ngoài app. Kết quả mới ghi `docs/evidence/auth-final` (HTTP) và `docs/evidence/auth-browser-final` (browser-only); không nhầm với evidence cũ bên dưới. Chỉ dùng kết quả có completedAt/status/cleanup, xem trạng thái mới nhất trong HANDOFF.
+
+Đã tìm lỗi browser reset403 do no-referrer/Origin:null, có [hồ sơ trước/sau](docs/BUG_RESET_BROWSER_403.md). Không tự sửa dữ liệu nhà hàng để kiểm thử; không dùng seed cũ hoặc dbpush khi chuyển máy.
+
 Node.js + Express + EJS, Prisma 5 và PostgreSQL (Supabase). CRUD và authentication dùng form HTML + redirect 303 theo PRG, không fetch/AJAX/SPA. Block8 tích hợp trên `feat/backport-block7-pagination-ssr`, giữ phân trang/tìm/lọc/sort; chưa làm Block9.
 
 ## Authentication Block8

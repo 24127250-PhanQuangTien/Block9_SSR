@@ -1,5 +1,30 @@
 # Manifest file chưa commit
 
+> Danh sách phía dưới là manifest lịch sử trước commit3622041. Đợt bàn giao mới đã được người dùng cho phép commit/push main; đọc HANDOFF và BLOCK8_FINAL_ACCEPTANCE để biết trạng thái hiện tại.
+
+## Bổ sung trong đợt hoàn thiện/bàn giao
+
+| File/nhóm | Thay đổi |
+|---|---|
+| `src/middleware/csrf.js` | Ngoại lệ hẹp native reset Origin:null + same-origin metadata + token đúng; giữ chặn cross-site. |
+| `src/routes/auth.js` | Resend không lộ pending khi hai tầng quota lệch; giữ303 register theo prompt. |
+| `src/services/captcha.js` | Consume cả challenge có answer thiếu/sai kiểu/quá dài. |
+| `src/services/otp.js` | Kiểm attempts trước hash. |
+| `src/services/mail.js` | Không Ethereal/preview ở production, giữ dev fallback theo prompt. |
+| `src/app.js` |404 không phản chiếu querytoken. |
+| `src/views/auth/start.ejs`, `src/views/partials/navbar.ejs`, `public/css/style.css` | Nền navbar auth nhìn rõ không phụ thuộcJS. |
+| `tests/auth.integration.js` |20 nhóm thật, schema riêng, sanitized request/DB snapshots, chế độ browser, preflightport/configerrorgiữkín. |
+| `tests/auth.browser.js` | Native auth1440/375 × JSon/off, keyboard/history, pagination, logout/reset/restart. |
+| `tests/helpers/authEvidence.js` | Allowlistredaction, screenshot UI và bảng dữ liệu thật đã che. |
+| `tests/auth.security.test.js` | Guard mailproduction, redaction, Origin:null/CSRF unit. |
+| `scripts/configure-mail.js`, `package.json` | Wizard SMTP nhậpẩn, mailcheck, thêmtestsecurity; không đổi dependency/lockfile. |
+| `docs/HANDOFF_BLOCK8.md`, `docs/MAIL_SETUP.md`, `docs/BLOCK8_FINAL_ACCEPTANCE.md` | Ngữ cảnhmáymới, SMTPinbox, kếtquả/hạnchế thực tế. |
+| `docs/BUG_RESET_BROWSER_403.md`, `docs/evidence/auth-*` | Lỗiagenttrước/sau, JSON/ảnh đã che; lịch sử lỗi được tách khỏiPASScuối. |
+| `docs/requirements/` | Hai prompt gốc để clone repo vẫn có yêu cầu. |
+| `README.md`, `docs/VERIFY.md`, `docs/auth-policy.md`, `docs/flows.md`, auditgốc | Cập nhật cách chạy, ngoại lệ, sơ đồ và liên kết trạng thái mới. |
+
+## Manifest lịch sử
+
 Nền: `feat/backport-block7-pagination-ssr`; bảo toàn các thay đổi phân trang trước Block8. Không commit/push. `.env` chỉ được bổ sung cấu hình local riêng, vẫn bị ignore và không thuộc Git/danh sách này. Không sửa Block7.
 
 | File | Mô tả |

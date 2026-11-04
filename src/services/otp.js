@@ -26,6 +26,10 @@ async function activate(db, email, otp, pepper) {
     if (challenge.lockedUntil && challenge.lockedUntil <= now) {
       challenge = await tx.activationChallenge.update({ where: { id: challenge.id }, data: { attempts: 0, lockedUntil: null } });
     }
+    if (challenge.attempts >= policy.otpAttempts) {
+      await tx.activationChallenge.update({ where: { id: challenge.id }, data: { lockedUntil: new Date(+now + policy.otpLock) } });
+      return "limited";
+    }
     const matches = typeof otp === "string" && /^[0-9]{6}$/.test(otp) && equal(challenge.otpHash, otpHash(pepper, user.id, otp));
     if (user.status !== "pending" || challenge.purpose !== "activation" || challenge.usedAt || challenge.expiresAt <= now || challenge.attempts >= policy.otpAttempts || !matches) {
       const attempts = challenge.attempts + 1;

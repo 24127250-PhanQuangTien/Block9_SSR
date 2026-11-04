@@ -1,0 +1,220 @@
+{
+  "data": "Real Chrome + real HTTP/Prisma/PostgreSQL in isolated test schema; local SMTP",
+  "startedAt": "2026-11-04T11:36:40.760Z",
+  "chrome": "156.0.8078.80",
+  "checks": [
+    {
+      "name": "auth-1440-js",
+      "status": "FAIL",
+      "kind": "AssertionError",
+      "details": "withheld to protect credentials, OTP and tokens"
+    }
+  ],
+  "screenshots": [
+    "auth-1440-js-register.png",
+    "auth-1440-js-pending-login.png",
+    "auth-1440-js-otp-invalid.png",
+    "auth-1440-js-activated-login.png",
+    "auth-1440-js-dishes-pagination.png",
+    "auth-1440-js-admin-pagination.png",
+    "auth-1440-js-session-after-restart.png",
+    "auth-1440-js-forgot.png",
+    "auth-1440-js-forgot-sent.png",
+    "auth-1440-js-reset-form.png",
+    "auth-1440-js-failure.png"
+  ],
+  "network": [
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/register",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/register",
+      "status": 303
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 303
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 303
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=20",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=20",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/logout",
+      "status": 303
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 403
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/forgot",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/forgot",
+      "status": 303
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/forgot/sent",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/reset",
+      "status": 403
+    }
+  ]
+}

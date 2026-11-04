@@ -79,7 +79,9 @@ module.exports = function authRouter(db, config) {
       if (!user || user.status !== "pending") return null;
       return otp.issue(tx, user, config.pepper);
     });
-    if (sent?.limited) return limited(res);
+    // Public quotas above apply equally to missing/active/pending emails.
+    // An account's extra safety backstop must not reveal its existence/status.
+    // Suppress delivery, keeping the same 303 when public quotas allow it.
     if (sent?.otp) mail.send(email, "Mã kích hoạt tài khoản", `Mã kích hoạt: ${sent.otp}\nMã có hiệu lực trong 10 phút.`);
     req.session.activationEmail = email;
     await genericDelay(start);

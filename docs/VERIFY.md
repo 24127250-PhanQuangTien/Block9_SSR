@@ -1,5 +1,15 @@
 # Kiểm chứng Block8 và phân trang SSR
 
+## Đợt hoàn thiện sau audit, ưu tiên slide48–63
+
+`npm.cmd test`:22 ca offline sau bổ sung guard production mail và redaction/CSRF Origin:null. `npm.cmd run test:auth`:20 nhóm server/Prisma/PostgreSQL/SMTP local, thêm malformed CAPTCHA one-use, resend status privacy, correct CAPTCHA+password khi locked qua restart, reset token sai ba mục đích,8 cặp timing mô tả. Snapshot DB và request log allowlist được ghi tại `docs/evidence/auth-final/http-results.json`; không raw HTML/payload/HAR/storageState.
+
+`npm.cmd run test:auth -- --browser --browser-only`: Chrome riêng,1440/375px, JSon/off, native register/pending/OTP/login/forgot/reset/logout, keyboard focus/Enter, cả hai list có filter/sort/pageSize/history sau login; dữ liệu thật trong schema fixture riêng, không DB nhà hàng. Artifact: `docs/evidence/auth-browser-final/browser-results.json`, ảnh `auth-*.png`. Để chạy cả20 nhóm + browser observer: `npm.cmd run test:auth -- --browser`, tạo bảng HTML và ảnh UI/Network/Cookies/DB theo nhóm ở auth-final.
+
+Các ảnh bảng Network/Cookies/DB là **dữ liệu quan sát thật đã che từ HTTP/Playwright/Prisma**, không phải ảnh cửa sổ DevTools. Slide63 nếu giáo viên cần đúng tab Network/Application trong Chrome, nhóm chụp thủ công theo bảng phía dưới, che mọi cookie/token/OTP/secret. Không gọi ảnh bảng tổng hợp là ảnh DevTools. UI của observer là trạng thái cuối nhóm; request log trong cùng nhóm chứa các trường hợp chi tiết, không giả định một ảnh UI chứng minh mọi bước.
+
+Bằng chứng lỗi agent trước/sau: `docs/BUG_RESET_BROWSER_403.md`, ảnh trước sửa trong `docs/evidence/auth-reset-before/`; JSON FAIL trước sửa phải được giữ nhãn lịch sử, không gộp thành PASS của mã cuối. Kết quả cuối cùng xem HANDOFF; không kết luận pass từ file ảnh lẻ khi suite chưa kết thúc.
+
 ## Phân biệt môi trường
 
 - **Ứng dụng thật:** `npm start`, `http://localhost:3000`, database nhóm có 1.018 món/11 đầu bếp/60 nguyên liệu. Chỉ seed tài khoản auth mới và thao tác login/session; không ghi dữ liệu CRUD. Snapshot CRUD trước/sau migration trùng hoàn toàn.

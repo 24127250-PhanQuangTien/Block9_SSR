@@ -13,7 +13,11 @@ function prepare(req, res, next) {
 const csrf = config => (req, res, next) => {
   if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
   const origin = req.get("Origin");
-  if ((origin && origin !== config.origin) || !equal(req.session?.csrf, req.body?._csrf)) {
+  // Chrome native POST from a no-referrer reset page sends Origin: null.
+  // Only this route may use browser Fetch Metadata as the origin check;
+  // the synchronizer token is still mandatory. Cross-site/null stays denied.
+  const privateReset = origin === "null" && req.method === "POST" && req.path === "/reset" && req.get("Sec-Fetch-Site") === "same-origin";
+  if ((origin && origin !== config.origin && !privateReset) || !equal(req.session?.csrf, req.body?._csrf)) {
     return res.status(403).render("404", { statusCode: 403, title: "403 - Yêu Cầu Bị Từ Chối", message: "Phiên biểu mẫu không hợp lệ. Hãy tải lại trang và thử lại." });
   }
   next();

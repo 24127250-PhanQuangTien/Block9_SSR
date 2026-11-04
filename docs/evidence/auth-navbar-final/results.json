@@ -1,0 +1,43 @@
+{
+  "status": "PASS",
+  "data": "Real Chrome and isolated integration server3108, public GET only",
+  "checks": [
+    {
+      "width": 1440,
+      "javaScriptEnabled": true,
+      "status": "PASS",
+      "background": "rgb(28, 25, 23)",
+      "viewport": 1440,
+      "document": 1440,
+      "image": "register-1440-js.png"
+    },
+    {
+      "width": 1440,
+      "javaScriptEnabled": false,
+      "status": "PASS",
+      "background": "rgb(28, 25, 23)",
+      "viewport": 1440,
+      "document": 1440,
+      "image": "register-1440-nojs.png"
+    },
+    {
+      "width": 375,
+      "javaScriptEnabled": true,
+      "status": "PASS",
+      "background": "rgb(28, 25, 23)",
+      "viewport": 375,
+      "document": 375,
+      "image": "register-375-js.png"
+    },
+    {
+      "width": 375,
+      "javaScriptEnabled": false,
+      "status": "PASS",
+      "background": "rgb(28, 25, 23)",
+      "viewport": 375,
+      "document": 375,
+      "image": "register-375-nojs.png"
+    }
+  ],
+  "completedAt": "2026-11-04T11:46:39.449Z"
+}

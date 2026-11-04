@@ -1386,7 +1386,7 @@ ul { list-style: none; }
 }
 
 /* --- SSR dish pagination --- */
-.navbar.navbar--authenticated { background: var(--charcoal); border-bottom: 1px solid var(--gold); }
+.navbar.navbar--authenticated,.navbar.navbar--auth { background: var(--charcoal); border-bottom: 1px solid var(--gold); }
 .auth-account { margin-top: 82px; padding: 10px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; background: var(--cream-dark); }
 .auth-account__email { overflow-wrap: anywhere; }
 .auth-account__logout { padding: 8px 16px; min-height: 44px; background: var(--burgundy); color: var(--white); }

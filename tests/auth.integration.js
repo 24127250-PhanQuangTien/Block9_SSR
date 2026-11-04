@@ -8,21 +8,30 @@ const { randomBytes, randomUUID } = require("node:crypto");
 const { spawn, spawnSync } = require("node:child_process");
 const net = require("node:net");
 const fs = require("node:fs/promises");
+const path = require("node:path");
 const { PrismaClient } = require("@prisma/client");
 const argon2 = require("argon2");
 const security = require("../src/services/crypto");
 const { policy } = require("../src/config/authPolicy");
 const schema = "auth_test_" + randomBytes(12).toString("hex");
-const database = new URL(process.env.DATABASE_URL);
+let database;
+try { database = new URL(process.env.DATABASE_URL); }
+catch { console.error("DATABASE_URL không hợp lệ; cấu hình được giữ kín, chưa chạy kiểm thử."); process.exit(1); }
 database.searchParams.set("schema", schema);
-const testEnv = { ...process.env, DATABASE_URL: database.toString(), PORT: "3108", APP_BASE_URL: "http://localhost:3108", APP_ORIGIN: "http://localhost:3108", TRUST_PROXY: "false", NODE_ENV: "test", SESSION_SECRET: security.random(48), OTP_PEPPER: security.random(48), SMTP_HOST: "127.0.0.1", SMTP_USER: "", SMTP_PASS: "", SMTP_FROM: "Auth Test <no-reply@example.test>" };
+const testPort = process.env.AUTH_TEST_PORT || "3108";
+if (!/^[1-9][0-9]{3,4}$/.test(testPort) || Number(testPort) > 65535) throw new Error("INVALID_TEST_PORT");
+const testEnv = { ...process.env, DATABASE_URL: database.toString(), PORT: testPort, APP_BASE_URL: `http://localhost:${testPort}`, APP_ORIGIN: `http://localhost:${testPort}`, TRUST_PROXY: "false", NODE_ENV: "test", SESSION_SECRET: security.random(48), OTP_PEPPER: security.random(48), SMTP_HOST: "127.0.0.1", SMTP_USER: "", SMTP_PASS: "", SMTP_FROM: "Auth Test <no-reply@example.test>" };
 const db = new PrismaClient({ datasourceUrl: database.toString() });
 const base = testEnv.APP_BASE_URL;
-const results = { database: "real isolated PostgreSQL schema", securityMocks: false, checks: [], writesToApplicationSchema: 0 };
+const browserOnly = process.argv.includes("--browser-only");
+const evidence = path.resolve(process.env.AUTH_EVIDENCE_DIR || (browserOnly ? "docs/evidence/auth-browser-final" : "docs/evidence/auth-final"));
+const results = { startedAt: new Date().toISOString(), database: "real isolated PostgreSQL schema", securityMocks: false, checks: [], requests: [], writesToApplicationSchema: 0 };
 const inbox = [];
 let child, smtp, stage = "setup", created = false;
 const password = "Auth8-" + security.random(18);
 let account, pending, pendingOTP;
+let lastObservation, browserEvidence;
+const { safeURL, cookieFlags, databaseSnapshot } = require("./helpers/authEvidence");
 
 function cli(args) {
   const result = spawnSync(process.execPath, ["node_modules/prisma/build/index.js", ...args], { env: testEnv, encoding: "utf8", timeout: 120000 });
@@ -31,7 +40,17 @@ function cli(args) {
     throw Object.assign(new Error("ISOLATED_MIGRATION_FAILED"), { code });
   }
 }
-async function check(name, work) { stage = name; await work(); results.checks.push({ name, status: "PASS" }); console.log(JSON.stringify({ check: name, status: "PASS" })); }
+async function check(name, work) {
+  if (browserOnly) return;
+  stage = name;
+  const firstRequest = results.requests.length;
+  await work();
+  const snapshot = await databaseSnapshot(db);
+  const record = { name, status: "PASS", database: snapshot, requestRange: [firstRequest, results.requests.length] };
+  if (browserEvidence) record.artifacts = await browserEvidence.capture({ name, snapshot, requests: results.requests.slice(firstRequest), observation: lastObservation });
+  results.checks.push(record);
+  console.log(JSON.stringify({ check: name, status: "PASS" }));
+}
 function decode(value) { return value.replace(/&amp;/g, "&").replace(/&#34;|&quot;/g, '"').replace(/&#39;/g, "'"); }
 const hidden = (html, name) => decode(html.match(new RegExp(`name="${name}" value="([^"]*)"`))?.[1] || "");
 function assertWriteForms(html) {
@@ -52,6 +71,8 @@ class Client {
     const html = await response.text();
     const token = hidden(html, "_csrf");
     if (token) this.csrf = token;
+    results.requests.push({ check: stage, method, url: safeURL(route, base), status: response.status, location: response.headers.get("location") ? safeURL(response.headers.get("location"), base) : null, setCookie: cookies.filter(item => item.startsWith("sid=")).map(cookieFlags) });
+    lastObservation = { cookie: this.cookie, route, method };
     return { status: response.status, location: response.headers.get("location"), html, cookies, referrer: response.headers.get("referrer-policy") };
   }
   get(route) { return this.request(route); }
@@ -105,6 +126,12 @@ async function stopServer() {
 }
 
 async function main() {
+  // Never accidentally target somebody else's server already bound to 3108.
+  await new Promise((resolve, reject) => {
+    const probe = net.createServer();
+    probe.once("error", () => reject(new Error("ISOLATED_TEST_PORT_IN_USE")));
+    probe.listen(Number(testPort), () => probe.close(resolve));
+  });
   assert.match(schema, /^auth_test_[a-f0-9]{24}$/);
   cli(["migrate", "deploy"]); created = true;
   smtp = net.createServer(socket => {
@@ -131,6 +158,7 @@ async function main() {
   smtp.listen(0, "127.0.0.1"); await once(smtp, "listening"); testEnv.SMTP_PORT = String(smtp.address().port);
   account = await db.user.create({ data: { emailRaw: "active@example.test", email: "active@example.test", passwordHash: await security.hashPassword(password), status: "active", emailVerifiedAt: new Date() } });
   await startServer();
+  if (process.argv.includes("--browser")) browserEvidence = await require("./helpers/authEvidence").startBrowserEvidence({ base, evidence });
 
   await check("mandatory secrets and cookie production policy", async () => {
     const { configuration } = require("../src/config/authPolicy");
@@ -439,6 +467,72 @@ async function main() {
       assert.equal((await client.get(route + "?page=999")).status, 303);
     }
   });
+  await check("CAPTCHA consumes valid challenges even for omitted, array or oversized answers", async () => {
+    await clearLimits();
+    const { verify } = require("../src/services/captcha");
+    for (const answer of [undefined, ["bad"], "x".repeat(33)]) {
+      const client = new Client(); const cap = await capFrom(await client.get("/register"));
+      const row = await db.captchaChallenge.findUnique({ where: { id: cap.challengeId } });
+      assert.equal(await verify(db, row.anonId, "register", row.id, answer), false);
+      assert.ok((await db.captchaChallenge.findUnique({ where: { id: row.id } })).usedAt);
+      assert.equal(await verify(db, row.anonId, "register", row.id, cap.captcha), false);
+    }
+  });
+  await check("resend hides pending cooldown when generic quotas and account counters diverge", async () => {
+    await clearLimits(); const client = new Client(), email = "resend-private@example.test";
+    const user = await db.user.create({ data: { email, emailRaw: email, passwordHash: await security.hashPassword(password) } });
+    await db.activationChallenge.create({ data: { userId: user.id, otpHash: security.otpHash(testEnv.OTP_PEPPER, user.id, security.otpCode()), expiresAt: new Date(Date.now() + policy.otpTTL), lastSentAt: new Date(), sendWindowStart: new Date() } });
+    await client.get("/activate"); const before = inbox.length;
+    const existing = await client.post("/activate/resend", { email });
+    const missing = await client.post("/activate/resend", { email: "resend-absent@example.test" });
+    assert.equal(existing.status, 303); assert.equal(existing.location, missing.location); assert.equal(missing.status, 303);
+    assert.equal(inbox.length, before);
+  });
+  await check("correct CAPTCHA and password cannot bypass a lock persisted through restart", async () => {
+    await clearLimits(); const key = `login:email:${account.email}`;
+    await db.rateLimit.create({ data: { key, count: 10, windowStart: new Date(), lockedUntil: new Date(Date.now() + policy.loginLock) } });
+    const client = new Client(); await client.get("/login");
+    assert.equal((await client.post("/login", { email: account.email, password })).status, 429);
+    const cap = await capFrom(await client.get("/login"));
+    const before = await db.rateLimit.findUnique({ where: { key } });
+    await stopServer(); await startServer();
+    assert.equal((await client.post("/login", { email: account.email, password, ...cap })).status, 429);
+    assert.deepEqual(await db.rateLimit.findUnique({ where: { key } }), before);
+    assert.equal((await client.get("/dishes")).status, 303);
+  });
+  await check("reset token is rejected as password, activation OTP and signed session", async () => {
+    await clearLimits(); const email = "token-purpose@example.test", raw = security.random();
+    const user = await db.user.create({ data: { email, emailRaw: email, passwordHash: await security.hashPassword(password) } });
+    await db.activationChallenge.create({ data: { userId: user.id, otpHash: security.otpHash(testEnv.OTP_PEPPER, user.id, security.otpCode()), expiresAt: new Date(Date.now() + policy.otpTTL), lastSentAt: new Date(), sendWindowStart: new Date() } });
+    await db.passwordReset.create({ data: { userId: user.id, tokenHash: security.tokenHash(raw), expiresAt: new Date(Date.now() + policy.resetTTL) } });
+    const client = new Client(); assert.match((await client.login(email, raw)).html, /INVALID_CREDENTIALS/);
+    await client.get("/activate"); assert.match((await client.post("/activate", { email, otp: raw })).html, /INVALID_OTP/);
+    const forged = new Client(); forged.cookie = "sid=" + raw;
+    assert.equal((await forged.get("/dishes")).status, 303);
+    assert.equal((await db.passwordReset.findUnique({ where: { tokenHash: security.tokenHash(raw) } })).usedAt, null);
+  });
+  await check("forgot paired timing observations keep identical public status and content", async () => {
+    const observations = [];
+    for (let pair = 0; pair < 8; pair++) {
+      await clearLimits(); const client = new Client(); await client.get("/forgot");
+      const times = {};
+      for (const known of pair % 2 ? [false, true] : [true, false]) {
+        const start = performance.now(); const response = await client.post("/forgot", { email: known ? account.email : "timing-absent@example.test" });
+        const elapsed = Math.round(performance.now() - start);
+        assert.equal(response.status, 303); assert.equal(response.location, "/forgot/sent");
+        assert.match((await client.get(response.location)).html, /Nếu email đã đăng ký, hướng dẫn đã được gửi/);
+        times[known ? "knownMs" : "unknownMs"] = elapsed;
+      }
+      observations.push(times);
+    }
+    results.forgotTiming = { samples: observations, conclusion: "Descriptive observations only; not proof of constant-time behaviour or a production timing audit." };
+  });
+  if (browserEvidence) {
+    stage = "native browser auth acceptance";
+    if (browserOnly) await db.dish.createMany({ data: Array.from({ length: 31 }, (_, i) => ({ name: "Phở thử " + i, price: i % 3 * 1000, category: "Món thử", available: true })) });
+    await clearLimits();
+    results.browser = await require("./auth.browser")({ db, base, password, policy, security, message, inbox, clearLimits, startServer, stopServer, evidence, browser: browserEvidence.browser });
+  }
 }
 
 main().catch(error => {
@@ -446,6 +540,7 @@ main().catch(error => {
   console.error(JSON.stringify({ check: stage, status: "FAIL", kind: error.name, code: /^P\d{4}$/.test(error.code || "") ? error.code : undefined, details: "withheld to protect credentials and tokens" }));
   process.exitCode = 1;
 }).finally(async () => {
+  if (browserEvidence) await browserEvidence.close();
   await stopServer();
   if (smtp) await new Promise(resolve => smtp.close(resolve));
   let removed = false;
@@ -456,9 +551,9 @@ main().catch(error => {
   }
   await db.$disconnect();
   results.status = process.exitCode ? "FAIL" : "PASS";
-  await fs.mkdir("docs/evidence", { recursive: true });
-  await fs.writeFile("docs/evidence/auth-integration.json", JSON.stringify(results, null, 2) + "\n");
+  results.completedAt = new Date().toISOString();
+  await fs.mkdir(evidence, { recursive: true });
   results.isolatedSchemaRemoved = removed;
-  await fs.writeFile("docs/evidence/auth-integration.json", JSON.stringify(results, null, 2) + "\n");
+  await fs.writeFile(path.join(evidence, "http-results.json"), JSON.stringify(results, null, 2) + "\n");
   console.log(JSON.stringify({ status: results.status, groups: results.checks.length, isolatedSchemaRemoved: removed, applicationCrudUntouched: true }));
 });

@@ -84,7 +84,7 @@ app.use("/admin/ingredients", adminIngredientsRouter);
 app.use((req, res) => {
   res.status(404).render("404", {
     title: "404 - Không Tìm Thấy Trang",
-    message: `Đường dẫn "${req.originalUrl}" không tồn tại trên máy chủ.`,
+    message: `Đường dẫn "${req.path}" không tồn tại trên máy chủ.`,
   });
 });
 

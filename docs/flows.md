@@ -1,6 +1,6 @@
-# Bản nháp luồng SSR Block8
+# Sơ đồ tham khảo luồng SSR Block8
 
-Các sơ đồ là bản nháp để nhóm vẽ lại và giải thích. Tất cả màn hình là EJS, mọi ghi từ người dùng là POST có CSRF và Origin.
+Các sơ đồ là bản tham khảo đúng luồng mã để nhóm tự vẽ lại và giải thích theo slide62–63; không tuyên bố bản agent vẽ là sản phẩm nhóm tự vẽ. Tất cả màn hình là EJS, mọi ghi nghiệp vụ từ người dùng là POST có CSRF và kiểm Origin/Fetch Metadata như auth-policy.
 
 ```mermaid
 flowchart TD
@@ -17,10 +17,34 @@ flowchart TD
  I -- pending --> K[Giữ password; resend nếu còn quota]
  I -- active --> L[Không tạo, không gửi OTP]
  J --> M[Mail async]
- K --> M
+ K --> Q{Có phát OTP mới?}
+ Q -- có --> M
+ Q -- không --> N
  L --> N[303 activate, cùng thông báo chung]
  M --> N
 ```
+
+```mermaid
+sequenceDiagram
+ participant B as Browser
+ participant E as Express session middleware
+ participant S as PrismaSessionStore
+ participant D as PostgreSQL
+ B->>E: Cookie sid có chữ ký
+ E->>S: get(sid)
+ S->>D: Session.findUnique
+ D-->>S: data JSON và expiresAt
+ S-->>E: Session còn hạn
+ E->>D: User active + authVersion + idle/absolute
+ E-->>B: EJS CRUD/phân trang
+ Note over E,D: Restart không xóa Session/RateLimit trong DB
+ B->>E: POST logout + CSRF
+ E->>S: destroy(sid)
+ S->>D: deleteMany sid
+ E-->>B: Clear cookie +303 login
+```
+
+Vấn đáp ngắn: cookie chỉ giữ SID có chữ ký, DB mới giữ session; xóa cookie không tự xóa row DB. CAPTCHA tăng chi phí bot nhưng không thay counter/khóa. Pending bị chặn trước regenerate ở login và ở guard. Reset token chỉ lưu hash; POST reset xóa mọi session user. GET reset không claim token; POST native với no-referrer dùng ngoại lệ Origin:null + same-origin Fetch Metadata + CSRF. Public chỉ các trang auth/static; toàn CRUD phải login. Chi tiết bằng chứng tại VERIFY và HANDOFF.
 
 ```mermaid
 flowchart TD

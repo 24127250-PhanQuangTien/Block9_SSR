@@ -1,0 +1,426 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Block8 — bằng chứng đã che</title>
+  <style>body{font:16px system-ui;line-height:1.5;margin:24px;color:#182235}h1{font-size:24px}h2{font-size:20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f4f8;padding:16px;border-radius:8px;font-size:13px}img{max-width:100%;border:1px solid #ccd}a{color:#1453a3}</style>
+  <h1>idle, absolute expiry and inactive users are rejected server-side</h1><p>Dữ liệu thật trong schema kiểm thử riêng. Không dùng mock bảo mật. Bí mật đã che.</p>
+  <p>Đây là báo cáo quan sát thu bằng Playwright/HTTP/Prisma, <strong>không phải ảnh giao diện DevTools</strong>. Ảnh UI là trạng thái quan sát cuối nhóm; bảng Network giữ các request kiểm chứng trong nhóm.</p>
+  <h2>Ảnh UI thật</h2><a href="group-11-ui.png">Mở ảnh UI</a>
+  <h2>Network — status, redirect, Set-Cookie đã che</h2><pre>[
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/dishes&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/dishes&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/dishes&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 200,
+    &quot;location&quot;: null,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;idle, absolute expiry and inactive users are rejected server-side&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;source&quot;: &quot;real browser navigation&quot;
+  },
+  {
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 200,
+    &quot;source&quot;: &quot;real browser navigation&quot;
+  }
+]</pre>
+  <h2>Application / Cookies — thuộc tính quan sát từ browser context</h2><pre>[
+  {
+    &quot;name&quot;: &quot;sid&quot;,
+    &quot;value&quot;: &quot;[REDACTED]&quot;,
+    &quot;httpOnly&quot;: true,
+    &quot;secure&quot;: false,
+    &quot;sameSite&quot;: &quot;Lax&quot;,
+    &quot;path&quot;: &quot;/&quot;,
+    &quot;expires&quot;: 1793793818.834211
+  }
+]</pre>
+  <h2>Database — snapshot Prisma, hash và định danh đã che</h2><pre>{
+  &quot;source&quot;: &quot;Prisma reads from the isolated real PostgreSQL test schema; up to 50 auth rows per table&quot;,
+  &quot;users&quot;: [
+    {
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;role&quot;: &quot;viewer&quot;,
+      &quot;verified&quot;: true,
+      &quot;passwordAlgorithm&quot;: &quot;Argon2id&quot;,
+      &quot;passwordHash&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;status&quot;: &quot;pending&quot;,
+      &quot;role&quot;: &quot;viewer&quot;,
+      &quot;verified&quot;: false,
+      &quot;passwordAlgorithm&quot;: &quot;Argon2id&quot;,
+      &quot;passwordHash&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;role&quot;: &quot;viewer&quot;,
+      &quot;verified&quot;: true,
+      &quot;passwordAlgorithm&quot;: &quot;Argon2id&quot;,
+      &quot;passwordHash&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;role&quot;: &quot;viewer&quot;,
+      &quot;verified&quot;: true,
+      &quot;passwordAlgorithm&quot;: &quot;Argon2id&quot;,
+      &quot;passwordHash&quot;: &quot;[REDACTED]&quot;
+    }
+  ],
+  &quot;activations&quot;: [
+    {
+      &quot;attempts&quot;: 2,
+      &quot;lockedUntil&quot;: null,
+      &quot;expiresAt&quot;: &quot;2026-11-04T11:41:28.108Z&quot;,
+      &quot;usedAt&quot;: &quot;2026-11-04T11:31:44.158Z&quot;,
+      &quot;sendCount&quot;: 1,
+      &quot;otpHashStored&quot;: true,
+      &quot;otpHash&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;attempts&quot;: 1,
+      &quot;lockedUntil&quot;: null,
+      &quot;expiresAt&quot;: &quot;2026-11-04T11:42:00.291Z&quot;,
+      &quot;usedAt&quot;: &quot;2026-11-04T11:32:04.180Z&quot;,
+      &quot;sendCount&quot;: 2,
+      &quot;otpHashStored&quot;: true,
+      &quot;otpHash&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;attempts&quot;: 5,
+      &quot;lockedUntil&quot;: &quot;2026-11-04T11:47:22.778Z&quot;,
+      &quot;expiresAt&quot;: &quot;2026-11-04T11:42:27.638Z&quot;,
+      &quot;usedAt&quot;: null,
+      &quot;sendCount&quot;: 3,
+      &quot;otpHashStored&quot;: true,
+      &quot;otpHash&quot;: &quot;[REDACTED]&quot;
+    }
+  ],
+  &quot;resets&quot;: [],
+  &quot;sessions&quot;: [
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:51.367Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:38.849Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:48.097Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:58.356Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:03:18.387Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:02:31.068Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: true,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:03:10.915Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:03:23.698Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:19.187Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:02.605Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:03:04.795Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:42.868Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:02:06.203Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:44.647Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:01:22.767Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    }
+  ],
+  &quot;counters&quot;: [
+    {
+      &quot;key&quot;: &quot;login:ip:[REDACTED]&quot;,
+      &quot;count&quot;: 3,
+      &quot;windowStart&quot;: &quot;2026-11-04T11:33:25.917Z&quot;,
+      &quot;lockedUntil&quot;: null
+    }
+  ],
+  &quot;crudCounts&quot;: {
+    &quot;dishes&quot;: 0,
+    &quot;chefs&quot;: 0,
+    &quot;ingredients&quot;: 0
+  }
+}</pre></html>

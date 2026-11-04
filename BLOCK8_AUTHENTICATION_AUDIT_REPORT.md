@@ -1,5 +1,7 @@
 # Báo cáo kiểm tra Authentication Block8
 
+> **Lưu ý phiên bản:** nội dung audit dưới đây là snapshot của mã trước khắc phục, đã commit ở3622041. Sau đó người dùng yêu cầu tiếp tục sửa mã và bàn giao máy mới. Đọc [kết quả khắc phục hiện tại](docs/BLOCK8_FINAL_ACCEPTANCE.md) và [file bàn giao](docs/HANDOFF_BLOCK8.md) để biết trạng thái mới; không áp dụng nguyên bảng30/34 hoặc câu “chỉ thêm báo cáo” của audit lịch sử cho working tree sau sửa.
+
 ## 1. Tóm tắt điều hành
 
 **Đối tượng:** Web-Block5, giữ nền Express/EJS và phân trang SSR đang triển khai. **Ngày audit:** 04/11/2026, múi giờ UTC+7. **Nhánh:** `feat/backport-block7-pagination-ssr`. **HEAD:** `2220580234324fd75becd06c612ee5c40a627252`.

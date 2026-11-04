@@ -1,0 +1,602 @@
+<!doctype html><html lang="vi"><meta charset="utf-8"><title>Block8 — bằng chứng đã che</title>
+  <style>body{font:16px system-ui;line-height:1.5;margin:24px;color:#182235}h1{font-size:24px}h2{font-size:20px}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f4f8;padding:16px;border-radius:8px;font-size:13px}img{max-width:100%;border:1px solid #ccd}a{color:#1453a3}</style>
+  <h1>all unauthenticated CRUD GET/POST/override requests redirect 303 before writes</h1><p>Dữ liệu thật trong schema kiểm thử riêng. Không dùng mock bảo mật. Bí mật đã che.</p>
+  <p>Đây là báo cáo quan sát thu bằng Playwright/HTTP/Prisma, <strong>không phải ảnh giao diện DevTools</strong>. Ảnh UI là trạng thái quan sát cuối nhóm; bảng Network giữ các request kiểm chứng trong nhóm.</p>
+  <h2>Ảnh UI thật</h2><a href="group-02-ui.png">Mở ảnh UI</a>
+  <h2>Network — status, redirect, Set-Cookie đã che</h2><pre>[
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/new&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/1/edit&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/1/delete&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/1&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/1?_method=PATCH&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/dishes/1?_method=DELETE&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/chefs&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/new&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/1/edit&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/1/delete&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/1&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/chefs&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/1?_method=PATCH&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/chefs/1?_method=DELETE&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/new&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/1/edit&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/1/delete&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/1&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/1?_method=PATCH&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;POST&quot;,
+    &quot;url&quot;: &quot;/admin/ingredients/1?_method=DELETE&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/admin&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;check&quot;: &quot;all unauthenticated CRUD GET/POST/override requests redirect 303 before writes&quot;,
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes/1&quot;,
+    &quot;status&quot;: 303,
+    &quot;location&quot;: &quot;/login&quot;,
+    &quot;setCookie&quot;: [
+      {
+        &quot;name&quot;: &quot;sid&quot;,
+        &quot;value&quot;: &quot;[REDACTED]&quot;,
+        &quot;httpOnly&quot;: true,
+        &quot;secure&quot;: false,
+        &quot;sameSite&quot;: &quot;Lax&quot;,
+        &quot;path&quot;: &quot;/&quot;,
+        &quot;domainSet&quot;: false,
+        &quot;expiresSet&quot;: true
+      }
+    ]
+  },
+  {
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/dishes/1&quot;,
+    &quot;status&quot;: 303,
+    &quot;source&quot;: &quot;real browser navigation&quot;
+  },
+  {
+    &quot;method&quot;: &quot;GET&quot;,
+    &quot;url&quot;: &quot;/login&quot;,
+    &quot;status&quot;: 200,
+    &quot;source&quot;: &quot;real browser navigation&quot;
+  }
+]</pre>
+  <h2>Application / Cookies — thuộc tính quan sát từ browser context</h2><pre>[
+  {
+    &quot;name&quot;: &quot;sid&quot;,
+    &quot;value&quot;: &quot;[REDACTED]&quot;,
+    &quot;httpOnly&quot;: true,
+    &quot;secure&quot;: false,
+    &quot;sameSite&quot;: &quot;Lax&quot;,
+    &quot;path&quot;: &quot;/&quot;,
+    &quot;expires&quot;: 1793793658.358196
+  }
+]</pre>
+  <h2>Database — snapshot Prisma, hash và định danh đã che</h2><pre>{
+  &quot;source&quot;: &quot;Prisma reads from the isolated real PostgreSQL test schema; up to 50 auth rows per table&quot;,
+  &quot;users&quot;: [
+    {
+      &quot;status&quot;: &quot;active&quot;,
+      &quot;role&quot;: &quot;viewer&quot;,
+      &quot;verified&quot;: true,
+      &quot;passwordAlgorithm&quot;: &quot;Argon2id&quot;,
+      &quot;passwordHash&quot;: &quot;[REDACTED]&quot;
+    }
+  ],
+  &quot;activations&quot;: [],
+  &quot;resets&quot;: [],
+  &quot;sessions&quot;: [
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:56.862Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:42.868Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    },
+    {
+      &quot;authenticated&quot;: false,
+      &quot;expiresAt&quot;: &quot;2026-11-04T12:00:44.647Z&quot;,
+      &quot;sid&quot;: &quot;[REDACTED]&quot;,
+      &quot;userId&quot;: &quot;[REDACTED]&quot;
+    }
+  ],
+  &quot;counters&quot;: [],
+  &quot;crudCounts&quot;: {
+    &quot;dishes&quot;: 0,
+    &quot;chefs&quot;: 0,
+    &quot;ingredients&quot;: 0
+  }
+}</pre></html>
