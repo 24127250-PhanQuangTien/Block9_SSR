@@ -1,5 +1,10 @@
 # Kết quả nghiệm thu Block8
 
+> **Cập nhật phạm vi theo yêu cầu mới:** `/dishes` và `/dishes/:id` được xem công khai; toàn bộ `/admin/*` và logout vẫn cần session hợp lệ. Trang kích hoạt dùng lại email từ phiên, hiển thị một lần thay cho hai ô nhập. Các số liệu và ma trận audit cũ bên dưới thuộc lượt ghi nhận trước thay đổi này; không dùng chúng để tự kết luận đã tái kiểm source mới. Phạm vi public menu là điều chỉnh có chủ đích so với prompt gốc.
+
+**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
+
+
 Đối chiếu [slide Block8](https://pub.nndkhoa9.win/web/week6/block8-deck.html), đặc biệt48–63, và [prompt nhóm trưởng](requirements/PROMPT-block8-auth-block5-ssr.md). Bản audit chi tiết, source và34 tiêu chí: [BLOCK8_AUTHENTICATION_AUDIT_REPORT](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md).
 
 ## Kết luận

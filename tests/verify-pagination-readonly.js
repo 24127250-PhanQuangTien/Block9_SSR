@@ -136,7 +136,9 @@ function fieldsFromGetForm(html) {
 async function main() {
   assert.ok(["127.0.0.1", "localhost"].includes(base.hostname) && base.protocol === "http:" && !base.username && !base.password);
   currentCheck = "unauthenticated guard and real login";
-  for (const path of ["/dishes", "/admin/dishes"]) {
+  const publicMenu = await fetch(new URL("/dishes", base), { redirect: "manual" });
+  assert.equal(publicMenu.status, 200);
+  for (const path of ["/admin/dishes", "/admin/chefs", "/admin/ingredients"]) {
     const anonymous = await fetch(new URL(path, base), { redirect: "manual" });
     assert.equal(anonymous.status, 303); assert.equal(anonymous.headers.get("location"), "/login");
   }

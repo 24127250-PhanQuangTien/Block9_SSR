@@ -53,9 +53,11 @@ Các giá trị tập trung tại `src/config/authPolicy.js`.
 
 ## Route
 
-Public: GET/POST `/register`, `/activate`, `/login`, `/forgot`, `/reset`; POST `/activate/resend`; GET `/forgot/sent`, `/captcha/new`; static assets. `/captcha/new` chỉ redirect về trang SSR để đổi mã, không JSON.
+Public: GET `/`, `/dishes`, `/dishes/:id`; GET/POST `/register`, `/activate`, `/login`, `/forgot`, `/reset`; POST `/activate/resend`; GET `/forgot/sent`, `/captcha/new`; static assets. `/captcha/new` chỉ redirect về trang SSR để đổi mã, không JSON.
 
-Protected: `/`, `/admin` và toàn bộ router `/dishes`, `/admin/dishes`, `/admin/chefs`, `/admin/ingredients`, mọi method; POST `/logout`. Không có trang giới thiệu public trong nền Block5.
+Protected: `/admin` và toàn bộ router `/admin/dishes`, `/admin/chefs`, `/admin/ingredients`, mọi method; POST `/logout`. Theo yêu cầu mới của người dùng, thực đơn và chi tiết món ăn ở `/dishes` là trang chỉ đọc công khai; `/` chuyển303 tới thực đơn. Phạm vi này thay cho yêu cầu cũ bắt đăng nhập cả trang khách.
+
+Trang kích hoạt hiển thị một lần email lấy từ phiên đăng ký; hai form dùng lại email đó qua trường ẩn. Nếu đăng nhập đúng password của tài khoản pending, email cần kích hoạt cũng được lưu vào phiên. Không có ô nhập email trên trang kích hoạt; khi chưa có email trong phiên, trang hướng dẫn đăng ký/đăng nhập. Countdown gửi lại mã và các quota server vẫn giữ nguyên.
 
 ## Quyết định và sai khác cần đọc
 

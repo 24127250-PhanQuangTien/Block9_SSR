@@ -1,18 +1,23 @@
 <%- include('start') %>
+<% if (email) { %>
+<p class="auth-activation-email">Email kích hoạt: <strong><%= email %></strong></p>
 <form action="/activate" method="POST" class="auth-form">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <label for="email">Email</label><input id="email" name="email" type="email" value="<%= email %>" autocomplete="email" maxlength="254" required>
+  <input type="hidden" name="email" value="<%= email %>">
   <label for="otp">Mã kích hoạt 6 chữ số</label><input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
   <button type="submit" class="btn btn--primary">Kích Hoạt</button>
 </form>
 <form action="/activate/resend" method="POST" class="auth-form" data-resend-form data-resend-wait-ms="<%= resendWaitMs %>">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-  <label for="resend-email">Email cần gửi lại mã</label><input id="resend-email" name="email" type="email" value="<%= email %>" autocomplete="email" maxlength="254" required>
+  <input type="hidden" name="email" value="<%= email %>">
   <button type="submit" class="btn auth-resend-button" data-resend-button aria-describedby="resend-status" <% if (resendWaitMs > 0) { %>disabled<% } %>>
     Gửi Lại Mã <span data-resend-countdown aria-hidden="true"><%= resendWaitMs > 0 ? `(${Math.ceil(resendWaitMs / 1000)}s)` : '' %></span>
   </button>
   <p id="resend-status" class="auth-resend-status" role="status" data-resend-status><%= resendWaitMs > 0 ? 'Bạn có thể gửi lại mã khi hết thời gian chờ.' : 'Bạn có thể yêu cầu gửi lại mã kích hoạt.' %></p>
   <noscript><p>Hãy <a href="/activate">tải lại trang</a> để cập nhật thời gian chờ và mở lại nút khi đã hết hạn.</p></noscript>
 </form>
+<% } else { %>
+<p>Trang này sử dụng email đã đăng ký trong phiên hiện tại. Bạn có thể <a href="/register">đăng ký tài khoản</a> hoặc <a href="/login">đăng nhập tài khoản chưa kích hoạt</a> để tiếp tục.</p>
+<% } %>
 <script src="/js/activation.js" defer></script>
 <%- include('end') %>

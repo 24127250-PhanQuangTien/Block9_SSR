@@ -29,7 +29,7 @@ module.exports = function authRouter(db, config) {
       if (!await rate.consume(db, ipKey(req, "captcha"), policy.captchaIssueLimit, policy.captchaIssueWindow)) return limited(res);
       challenge = await captcha.issue(db, req.session.anonId, view === "register" ? "register" : "login");
     }
-    const resendWaitMs = view === "activate" ? await resendCooldown(db, req.ip, email) : 0;
+    const resendWaitMs = view === "activate" && email ? await resendCooldown(db, req.ip, email) : 0;
     if (view === "activate" && status === 429)
     {
       res.set("Retry-After", String(Math.max(1, Math.ceil(resendWaitMs / 1000))));
@@ -68,7 +68,7 @@ module.exports = function authRouter(db, config) {
     res.redirect(303, "/activate");
   });
 
-  router.get("/activate", wrap((req, res) => renderForm(req, res, "activate", { email: req.session.activationEmail || "", message: "Nếu email hợp lệ, chúng tôi đã gửi mã kích hoạt." })));
+  router.get("/activate", wrap((req, res) => renderForm(req, res, "activate", { email: req.session.activationEmail || "", message: req.session.activationEmail ? "Nếu email hợp lệ, chúng tôi đã gửi mã kích hoạt." : "Vui lòng đăng ký hoặc đăng nhập tài khoản chưa kích hoạt để tiếp tục." })));
   post("/activate", async (req, res) => {
     const email = emailOf(req);
     if (!await rate.consume(db, ipKey(req, "activate"), policy.activationLimit, policy.loginWindow) || !await rate.consume(db, `activate:email:${email}`, policy.activationLimit, policy.loginWindow)) return limited(res);
@@ -124,7 +124,12 @@ module.exports = function authRouter(db, config) {
       return renderForm(req, res, "login", { email, showCaptcha: current.count >= policy.loginCaptchaAfter, error: "Email hoặc mật khẩu không đúng.", code: "INVALID_CREDENTIALS" });
     }
     if ((await rate.read(db, key, policy.loginWindow)).locked) return limited(res);
-    if (user.status !== "active") return renderForm(req, res, "login", { email, error: "Tài khoản cần kích hoạt trước khi đăng nhập.", code: "ACTIVATION_REQUIRED", showCaptcha: failures.count >= policy.loginCaptchaAfter });
+    if (user.status !== "active")
+    {
+      req.session.activationEmail = user.email;
+      await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
+      return renderForm(req, res, "login", { email, error: "Tài khoản cần kích hoạt trước khi đăng nhập.", code: "ACTIVATION_REQUIRED", showCaptcha: failures.count >= policy.loginCaptchaAfter });
+    }
     await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
     Object.assign(req.session, { userId: user.id, createdAt: Date.now(), lastSeenAt: Date.now(), authVersion: +user.updatedAt, freshAuthentication: true, csrf: crypto.random(), anonId: crypto.random(24) });
     await db.rateLimit.deleteMany({ where: { key } });

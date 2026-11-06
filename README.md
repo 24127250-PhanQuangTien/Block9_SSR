@@ -10,14 +10,16 @@ Người dùng đã xác nhận đăng ký → CAPTCHA → nhận OTP qua email 
 
 **Chưa tuyên bố hoàn tất100% hồ sơ nộp bài.** Slide63 còn cần ảnh UI/Network/Application và request trực tiếp cho từng kịch bản, cùng sơ đồ do nhóm tự vẽ. GET vẫn ghi metadata session/CAPTCHA/counter bảo mật; timing chống dò email chưa được bảo đảm. Xem [báo cáo audit hiện tại](BLOCK8_AUTHENTICATION_AUDIT_REPORT.md), [kết quả nghiệm thu](docs/BLOCK8_FINAL_ACCEPTANCE.md) và [cách kiểm chứng](docs/VERIFY.md).
 
-| Bằng chứng đã hoàn tất | Kết quả | Phạm vi |
+| Bằng chứng audit ngày 04/11 | Kết quả | Phạm vi |
 |---|---|---|
 | `npm.cmd test` | 24/24PASS | Validation, HTTP/EJS, phân trang, auth security; persistence fixture offline |
 | HTTP/Prisma | 21/21 nhóm PASS,276 request | Schema PostgreSQL ngẫu nhiên, SMTP local, hai server process; [JSON](docs/evidence/auth-release-http/http-results.json) |
 | Chrome native form | 4/4PASS,45 ảnh | 1440/375px × JS bật/tắt, auth và hai list sau login; [JSON](docs/evidence/auth-release-browser/browser-results.json) |
 | OTP email thật | Người dùng xác nhận thành công | Không lưu địa chỉ, OTP, cookie hay credential vào repo |
 
-HTTP hoàn tất 2026-11-04T15:48:33.647Z; Chrome hoàn tất 2026-11-04T15:45:29.306Z, phiên bản156.0.8078.80. Đây là lượt chạy lại source cuối, gồm logging mail an toàn. Không lấy số test offline làm bằng chứng SMTP/inbox hoặc production.
+HTTP hoàn tất 2026-11-04T15:48:33.647Z; Chrome hoàn tất 2026-11-04T15:45:29.306Z, phiên bản156.0.8078.80. Đây là lượt chạy source ngày 04/11, gồm logging mail an toàn. Không lấy số test offline làm bằng chứng SMTP/inbox hoặc production.
+
+**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](docs/evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](docs/evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
 
 ## Chạy ứng dụng
 
@@ -52,9 +54,9 @@ Development thiếu SMTP dùng Ethereal: thư không tới inbox thật, preview
 
 ## Routes và xác thực
 
-- Public: GET/POST `/register`, `/activate`, `/login`, `/forgot`, `/reset`; POST `/activate/resend`; GET `/forgot/sent`, `/captcha/new`; static assets.
-- Protected: `/`, `/admin`, `/dishes`, `/dishes/:id`, toàn bộ `/admin/dishes`, `/admin/chefs`, `/admin/ingredients`, và POST `/logout`.
-- Chưa đăng nhập gọi CRUD bằng bất kỳ method nào đều303 `/login`; pending không có session authenticated. Login active đổi SID, lưu session trong PostgreSQL. Logout và reset thu hồi session phía server.
+- Public: GET `/`, `/dishes`, `/dishes/:id`; GET/POST `/register`, `/activate`, `/login`, `/forgot`, `/reset`; POST `/activate/resend`; GET `/forgot/sent`, `/captcha/new`; static assets.
+- Protected: `/admin`, toàn bộ `/admin/dishes`, `/admin/chefs`, `/admin/ingredients`, và POST `/logout`.
+- Chưa đăng nhập gọi CRUD quản trị bằng bất kỳ method nào đều303 `/login`; pending không có session authenticated. Login active đổi SID, lưu session trong PostgreSQL. Logout và reset thu hồi session phía server.
 - Mọi form ghi có CSRF; Origin được kiểm tra. Ngoại lệ native reset Origin:null chỉ cho POST `/reset` + Fetch Metadata same-origin + CSRF đúng.
 - `role` do server gán mặc định viewer; mọi active user được CRUD theo phạm vi bài. Chưa làm RBAC/ABAC.
 

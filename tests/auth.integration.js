@@ -23,6 +23,8 @@ let database;
 try { database = new URL(process.env.DATABASE_URL); }
 catch { console.error("DATABASE_URL không hợp lệ; cấu hình được giữ kín, chưa chạy kiểm thử."); process.exit(1); }
 database.searchParams.set("schema", schema);
+// Keep the test runner and both app processes within the remote test DB pool.
+database.searchParams.set("connection_limit", "2");
 const testPort = process.env.AUTH_TEST_PORT || "3108";
 if (!/^[1-9][0-9]{3,4}$/.test(testPort) || Number(testPort) > 65535) throw new Error("INVALID_TEST_PORT");
 const testEnv = { ...process.env, DATABASE_URL: database.toString(), PORT: testPort, APP_BASE_URL: `http://localhost:${testPort}`, APP_ORIGIN: `http://localhost:${testPort}`, TRUST_PROXY: "false", NODE_ENV: "test", SESSION_SECRET: security.random(48), OTP_PEPPER: security.random(48), SMTP_HOST: "127.0.0.1", SMTP_USER: "", SMTP_PASS: "", SMTP_FROM: "Auth Test <no-reply@example.test>" };
@@ -204,7 +206,7 @@ async function main() {
     assert.deepEqual(options, { httpOnly: true, sameSite: "lax", secure: true, path: "/" });
     assert.equal("domain" in options, false);
   });
-  await check("all unauthenticated CRUD GET/POST/override requests redirect 303 before writes", async () => {
+  await check("public menu is readable while all unauthenticated admin CRUD requests redirect 303 before writes", async () => {
     const anonymous = new Client();
     for (const area of ["dishes", "chefs", "ingredients"]) {
       for (const suffix of ["", "/new", "/1/edit", "/1/delete", "/1"]) {
@@ -216,7 +218,12 @@ async function main() {
         assert.equal(response.status, 303); assert.equal(response.location, "/login");
       }
     }
-    for (const route of ["/", "/admin", "/dishes", "/dishes/1"]) assert.equal((await anonymous.get(route)).status, 303);
+    assert.equal((await anonymous.get("/admin")).status, 303);
+    assert.equal((await anonymous.get("/")).location, "/dishes");
+    const menu = await anonymous.get("/dishes?pageSize=10&page=1");
+    assert.equal(menu.status, 200);
+    assert.doesNotMatch(menu.html, /action="\/logout"/);
+    assert.equal((await anonymous.get("/dishes/1")).status, 404);
     assert.deepEqual(await Promise.all([db.dish.count(), db.chef.count(), db.ingredient.count()]), [0, 0, 0]);
   });
   await check("CSRF and Origin reject public auth submissions", async () => {
@@ -275,7 +282,7 @@ async function main() {
     assert.equal(results.filter(result => /INVALID_OTP/.test(result.html)).length, 1);
     const activated = await db.user.findUnique({ where: { id: pending.id } });
     assert.equal(activated.status, "active"); assert.ok(activated.emailVerifiedAt);
-    assert.equal((await client.get("/dishes")).status, 303);
+    assert.equal((await client.get("/admin/dishes")).status, 303);
     assert.match((await client.post("/activate", { email: pending.email, otp: pendingOTP })).html, /INVALID_OTP/);
     const otpAsPassword = new Client();
     assert.match((await otpAsPassword.login(pending.email, pendingOTP)).html, /INVALID_CREDENTIALS/);
@@ -360,7 +367,7 @@ async function main() {
     const cookie = client.cookie, sid = sessionId(cookie);
     const row = await db.session.findUnique({ where: { sid } }); assert.ok(row && row.userId === account.id);
     await stopServer(); await startServer();
-    assert.equal((await client.get("/dishes")).status, 200);
+    assert.equal((await client.get("/admin/dishes")).status, 200);
     assert.equal((await client.post("/logout", {}, { noCsrf: true })).status, 403);
     assert.equal((await client.post("/logout", {}, { headers: { Origin: "https://other.invalid" } })).status, 403);
     assert.equal((await client.post("/logout", {})).status, 303);
@@ -369,7 +376,7 @@ async function main() {
     const store = new PrismaSessionStore(db);
     await new Promise((resolve, reject) => store.set(sid, JSON.parse(row.data), error => error ? reject(error) : resolve()));
     assert.equal(await db.session.findUnique({ where: { sid } }), null);
-    const replay = new Client(); replay.cookie = cookie; assert.equal((await replay.get("/dishes")).status, 303);
+    const replay = new Client(); replay.cookie = cookie; assert.equal((await replay.get("/admin/dishes")).status, 303);
   });
   await check("idle, absolute expiry and inactive users are rejected server-side", async () => {
     await clearLimits();
@@ -378,7 +385,10 @@ async function main() {
       const row = await db.session.findUnique({ where: { sid } }); const data = JSON.parse(row.data);
       data[field] = Date.now() - (field === "createdAt" ? policy.absolute : policy.idle) - 1;
       await db.session.update({ where: { sid }, data: { data: JSON.stringify(data), expiresAt: new Date(Date.now() + policy.idle) } });
-      assert.equal((await client.get("/dishes")).status, 303);
+      const publicMenu = await client.get("/dishes");
+      assert.equal(publicMenu.status, 200);
+      assert.doesNotMatch(publicMenu.html, /action="\/logout"/);
+      assert.equal((await client.get("/admin/dishes")).status, 303);
     }
     const client = new Client(); await client.login();
     await db.user.update({ where: { id: account.id }, data: { status: "pending" } });
@@ -426,7 +436,7 @@ async function main() {
     assert.equal(reset.filter(response => response.status === 303).length, 1);
     assert.equal(reset.filter(response => /INVALID_RESET/.test(response.html)).length, 1);
     assert.equal(await db.session.count({ where: { userId: account.id } }), 0);
-    for (const cookie of oldCookies) { const replay = new Client(); replay.cookie = cookie; assert.equal((await replay.get("/dishes")).status, 303); }
+    for (const cookie of oldCookies) { const replay = new Client(); replay.cookie = cookie; assert.equal((await replay.get("/admin/dishes")).status, 303); }
     assert.ok(await argon2.verify((await db.user.findUnique({ where: { id: account.id } })).passwordHash, newPassword));
     const notification = await message(account.email, beforeMail, value => value.includes("Mật khẩu của bạn vừa được thay đổi"));
     assert.equal(notification.includes(newPassword), false);
@@ -483,6 +493,9 @@ async function main() {
     }
     assert.equal((await client.get(created.location)).status, 200);
     assert.equal((await client.get(`/dishes/${dish.id}`)).status, 200);
+    const guest = new Client();
+    assert.equal((await guest.get(`/dishes/${dish.id}`)).status, 200);
+    assert.equal((await guest.get(`/admin/dishes/${dish.id}`)).status, 303);
     assert.equal((await client.post(`/admin/dishes/${dish.id}?_method=PATCH`, { ...values, price: "2abc" })).status, 400);
     assert.equal((await client.post(`/admin/dishes/${dish.id}?_method=PATCH`, { ...values, name: "Món sửa" })).status, 303);
     assert.equal((await client.post(`/admin/chefs/${chef.id}?_method=PATCH`, { name: "Chef sửa", specialty: "Bếp Việt" })).status, 303);
@@ -517,7 +530,7 @@ async function main() {
     await clearLimits(); const client = new Client(), email = "resend-private@example.test";
     const user = await db.user.create({ data: { email, emailRaw: email, passwordHash: await security.hashPassword(password) } });
     await db.activationChallenge.create({ data: { userId: user.id, otpHash: security.otpHash(testEnv.OTP_PEPPER, user.id, security.otpCode()), expiresAt: new Date(Date.now() + policy.otpTTL), lastSentAt: new Date(), sendWindowStart: new Date() } });
-    await client.get("/activate"); const before = inbox.length;
+    await client.get("/login"); const before = inbox.length;
     const existing = await client.post("/activate/resend", { email });
     const missing = await client.post("/activate/resend", { email: "resend-absent@example.test" });
     assert.equal(existing.status, 303); assert.equal(existing.location, missing.location); assert.equal(missing.status, 303);
@@ -533,7 +546,7 @@ async function main() {
     await stopServer(); await startServer();
     assert.equal((await client.post("/login", { email: account.email, password, ...cap })).status, 429);
     assert.deepEqual(await db.rateLimit.findUnique({ where: { key } }), before);
-    assert.equal((await client.get("/dishes")).status, 303);
+    assert.equal((await client.get("/admin/dishes")).status, 303);
   });
   await check("reset token is rejected as password, activation OTP and signed session", async () => {
     await clearLimits(); const email = "token-purpose@example.test", raw = security.random();
@@ -543,7 +556,7 @@ async function main() {
     const client = new Client(); assert.match((await client.login(email, raw)).html, /INVALID_CREDENTIALS/);
     await client.get("/activate"); assert.match((await client.post("/activate", { email, otp: raw })).html, /INVALID_OTP/);
     const forged = new Client(); forged.cookie = "sid=" + raw;
-    assert.equal((await forged.get("/dishes")).status, 303);
+    assert.equal((await forged.get("/admin/dishes")).status, 303);
     assert.equal((await db.passwordReset.findUnique({ where: { tokenHash: security.tokenHash(raw) } })).usedAt, null);
   });
   await check("forgot paired timing observations keep identical public status and content", async () => {
@@ -584,11 +597,11 @@ async function main() {
       const originalCookie = first.cookie;
       const second = new Client(peerBase);
       second.cookie = originalCookie;
-      assert.equal((await second.get("/dishes")).status, 200);
+      assert.equal((await second.get("/admin/dishes")).status, 200);
       assert.equal((await second.post("/logout", {})).status, 303);
       assert.equal(await db.session.count({ where: { sid: sessionId(originalCookie) } }), 0);
       first.cookie = originalCookie;
-      assert.equal((await first.get("/dishes")).status, 303);
+      assert.equal((await first.get("/admin/dishes")).status, 303);
 
       const probes = [new Client(), new Client(peerBase)];
       for (const client of probes) await client.get("/login");
@@ -621,7 +634,7 @@ async function main() {
       for (let index = 0; index < sessions.length; index++)
       {
         sessions[index].cookie = oldCookies[index];
-        assert.equal((await sessions[index].get("/dishes")).status, 303);
+        assert.equal((await sessions[index].get("/admin/dishes")).status, 303);
       }
       results.multiInstance = { processes: 2, sharedSession: true, sharedLoginCounter: true, logoutRevokedAcrossProcesses: true, resetRevokedAcrossProcesses: true, transport: "local HTTP; shared configured application origin", deploymentVerified: false };
     }
@@ -637,9 +650,13 @@ async function main() {
     const email = "cooldown-absent@example.test";
     const remaining = response => Number(response.html.match(/data-resend-wait-ms="(\d+)"/)[1]);
     const button = response => response.html.match(/<button[^>]*data-resend-button[^>]*>/)[0];
-    await client.get("/activate");
+    const emptyActivation = await client.get("/activate");
+    assert.doesNotMatch(emptyActivation.html, /action="\/activate(?:\/resend)?"/);
+    await client.get("/login");
     assert.equal((await client.post("/activate/resend", { email })).status, 303);
     const first = await client.get("/activate");
+    assert.doesNotMatch(first.html, /type="email"/);
+    assert.match(first.html, /class="auth-activation-email"/);
     assert.ok(remaining(first) > 0 && remaining(first) <= policy.resendDelay);
     assert.match(button(first), /disabled/);
     const key = `resend:minute:${email}`;

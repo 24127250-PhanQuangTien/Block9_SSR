@@ -1394,6 +1394,10 @@ ul { list-style: none; }
 .auth-card { max-width: 520px; margin: auto; background: var(--white); padding: 32px; border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
 .auth-card h1 { margin: 8px 0 24px; font-size: 2rem; }
 .auth-eyebrow { color: var(--burgundy); }
+.auth-activation-email
+{
+  overflow-wrap: anywhere;
+}
 .auth-form { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
 .auth-form input:not([type="hidden"]) { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--stone-light); border-radius: var(--radius-sm); font: inherit; }
 .auth-form button { min-height: 44px; }

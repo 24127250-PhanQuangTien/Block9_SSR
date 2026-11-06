@@ -50,9 +50,15 @@ test("Express/EJS pagination contracts with in-memory Prisma (no real database)"
   const server = app.listen(0, "127.0.0.1");
   await once(server, "listening");
   const base = `http://127.0.0.1:${server.address().port}`;
-  for (const path of ["/dishes", "/admin/dishes"]) {
+  for (const path of ["/admin/dishes", "/admin/chefs", "/admin/ingredients"]) {
     const response = await fetch(base + path, { redirect: "manual" });
     assert.equal(response.status, 303); assert.equal(response.headers.get("location"), "/login");
+  }
+  for (const path of ["/dishes?page=2&pageSize=10", "/dishes/1"])
+  {
+    const response = await fetch(base + path, { redirect: "manual" });
+    assert.equal(response.status, 200);
+    assert.doesNotMatch(await response.text(), /action="\/logout"/);
   }
   const auth = await authFixture.login(base);
   async function request(path, values) {

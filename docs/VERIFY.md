@@ -1,5 +1,10 @@
 # Kiểm chứng Block8 và phân trang SSR
 
+> **Cập nhật phạm vi theo yêu cầu mới:** `/dishes` và `/dishes/:id` được xem công khai; toàn bộ `/admin/*` và logout vẫn cần session hợp lệ. Trang kích hoạt dùng lại email từ phiên, hiển thị một lần thay cho hai ô nhập. Các số liệu và ma trận audit cũ bên dưới thuộc lượt ghi nhận trước thay đổi này; không dùng chúng để tự kết luận đã tái kiểm source mới. Phạm vi public menu là điều chỉnh có chủ đích so với prompt gốc.
+
+**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
+
+
 Nguồn yêu cầu: [slide48–63](https://pub.nndkhoa9.win/web/week6/block8-deck.html). [Audit](../BLOCK8_AUTHENTICATION_AUDIT_REPORT.md) có đủ34 tiêu chí, source và kết quả; [FINAL_ACCEPTANCE](BLOCK8_FINAL_ACCEPTANCE.md) tóm tắt trạng thái hiện tại. Kịch bản dưới đây là hướng dẫn tái kiểm, không tự chứng minh nhóm đã chụp đủ ảnh hoặc tự trình bày.
 
 ## Kết quả đã hoàn tất
@@ -31,14 +36,14 @@ Không chạy `npm.cmd run seed`, `test:db` cũ, dbpush, reset hoặc migration 
 
 ## Checklist từng kịch bản
 
-Tất cả thao tác có ghi dưới đây phải ở schema test. A01…A21 là nhóm trong HTTP JSON; B là browser context. Kết quả PASS nguồn/test có trong audit; ảnh DevTools cần tự chụp theo phần kế tiếp.
+Tất cả thao tác có ghi dưới đây phải ở schema test. A01…A22 là nhóm trong HTTP JSON; B là browser context. Kết quả PASS nguồn/test có trong audit; ảnh DevTools cần tự chụp theo phần kế tiếp.
 
 | ID | Thao tác tái kiểm | Kết quả cần chứng minh | Quan sát/DB an toàn |
 |---|---|---|---|
 |SRC-01|Rà crypto, mail, mailDiagnostics, view reset|Không secret raw trong log/DB/bằng chứng ngoài mục đích hợp lệ|Algorithm/hashStored, không hash/raw value|
 |SRC-02|Register/login/reset thật|Argon2id, không MD5/SHA password|Chỉ prefix algorithm; A05/A09/A13|
 |SRC-03|Login pending đúng password|ACTIVATION_REQUIRED, không authenticated session|Session.userId count0; A06/B|
-|SRC-04|Gọi mọi GET/POST/override CRUD không cookie|303login trước write|A02, count CRUD không đổi|
+|SRC-04|Gọi mọi GET/POST/override CRUD quản trị không cookie|303login trước write|A02, count CRUD không đổi|
 |SRC-05|GETreset; GETregister/authenticated list|usedAt/password không đổi; công bố metadata GET có ghi|A12/B; Session/CAPTCHA/quota là ngoại lệ PARTIAL|
 |SRC-06|Xem hidden/cookie/client data|Chỉ ID/ảnh CAPTCHA, signedSID; store/counter ở server|A04/A16; không chụp đáp án|
 |ACT-01|Pending login|Không session authenticated|A06/B|
@@ -47,7 +52,7 @@ Tất cả thao tác có ghi dưới đây phải ở schema test. A01…A21 là
 |ACT-04|Resend sau cooldown, thử old/new|Cũ bị từ chối, mới kích hoạt được|A07; chỉ chụp thời gian/usedAt|
 |ACT-05|Đến ngưỡng attempts/send|Server429, resend không reset attempts/lock|A08/A14/A17; metadata fixture ở mép ngưỡng|
 |ACT-06|Register body roleadmin|DB viewer|A05; chỉ role/status|
-|ACT-07|GETdishes sau activate|303login, không auto-login|A06/B|
+|ACT-07|GET `/admin/dishes` sau activate|303login, không auto-login|A06/B|
 |ACT-08|OTP dùng làm password|INVALID_CREDENTIALS|A06; che toàn bộ payload|
 |CAP-01|Register thiếu/sai CAPTCHA|Không tạo user/mail|A04 user/inbox count|
 |CAP-02|CAPTCHA+dữ liệu hợp lệ|Pending/OTP đi tiếp|A05/B; không chụp raw email|
@@ -56,7 +61,7 @@ Tất cả thao tác có ghi dưới đây phải ở schema test. A01…A21 là
 |CAP-05|Đúng CAPTCHA, password sai|Email failure count tăng|A09 count4…10|
 |CAP-06|Đang khóa, password/CAPTCHA đúng|429, không session|A18 giữ lock qua restart|
 |CAP-07|Cookie jar/phiên mới khi khóa|Không né email counter|A09/A21|
-|SES-01|Không cookie gọi CRUD|303login, không write|A02|
+|SES-01|Không cookie gọi CRUD quản trị|303login, không write|A02|
 |SES-02|Login active|303, SID cookie, vào CRUD/list|A09/A15/B; che giá trị Set-Cookie|
 |SES-03|Email lạ/password sai|Cùng INVALID_CREDENTIALS|A09; không dùng timing để suy pass|
 |SES-04|SoSID trước/sau trong RAM|Khác nhau|A09/B; không in hai SID|
@@ -77,7 +82,7 @@ Dùng terminal riêng và schema test; không `curl -v/-i`, không in cookie jar
 ```powershell
 $authJar = Join-Path $env:TEMP 'block8-cookie-jar.txt'
 $authHtml = Join-Path $env:TEMP 'block8-form.html'
-curl.exe -s -o $authHtml -w '%{http_code}' http://localhost:3108/dishes
+curl.exe -s -o $authHtml -w '%{http_code}' http://localhost:3108/admin/dishes
 # Mong đợi303; xem Location đã che trong JSON/Network, không theo redirect để nhầm200.
 curl.exe -s -c $authJar -o $authHtml http://localhost:3108/login
 $csrf = [regex]::Match([IO.File]::ReadAllText($authHtml), 'name="_csrf" value="([^"]+)"').Groups[1].Value
@@ -89,7 +94,7 @@ $csrf = [regex]::Match([IO.File]::ReadAllText($authHtml), 'name="_csrf" value="(
 
 ## Chụp bằng chứng slide63
 
-Với **mỗi kịch bản** trong bảng, nhóm cần lưu đủ ảnh UI, Network, Application/Cookies và request trực tiếp, kèm DB field liên quan. Bảng HTML do Playwright/HTTP/Prisma dựng từ dữ liệu thật đã che không phải ảnh giao diện DevTools.45 screenshot auth không tự chứng minh đủ toàn bộ34 dòng.
+Với **mỗi kịch bản** trong bảng, nhóm cần lưu đủ ảnh UI, Network, Application/Cookies và request trực tiếp, kèm DB field liên quan. Bảng HTML do Playwright/HTTP/Prisma dựng từ dữ liệu thật đã che không phải ảnh giao diện DevTools. Các screenshot auth không tự chứng minh đủ toàn bộ34 dòng.
 
 - UI: chụp thông báo/mã lỗi, form/trang đích, viewport1440/375 khi phù hợp; che input email/password/OTP/CAPTCHA và navbar email.
 - Network: method, pathname/query đã che, status, redirect; tuyệt đối che token URL, request payload, CSRF/challengeId/OTP/password và Set-Cookie value. Giữ cookie flags nhìn được.

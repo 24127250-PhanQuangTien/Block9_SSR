@@ -1,0 +1,1643 @@
+{
+  "data": "Real Chrome + real HTTP/Prisma/PostgreSQL in isolated test schema; local SMTP",
+  "startedAt": "2026-11-06T02:51:10.252Z",
+  "chrome": "156.0.8078.81",
+  "checks": [
+    {
+      "name": "auth-1440-js",
+      "status": "PASS",
+      "width": 1440,
+      "javaScriptEnabled": true,
+      "nativeForms": true,
+      "resendCooldown": true,
+      "sidRotated": true,
+      "smtpOTPReceived": true,
+      "smtpResetReceived": true,
+      "keyboardTabFocusEnter": true,
+      "paginationBothLists": true,
+      "history": true,
+      "csrf403": true,
+      "logoutAndResetRevokeSession": true,
+      "cookies": [
+        {
+          "name": "sid",
+          "value": "[REDACTED]",
+          "httpOnly": true,
+          "sameSite": "Lax",
+          "secure": false,
+          "path": "/"
+        }
+      ]
+    },
+    {
+      "name": "auth-1440-nojs",
+      "status": "PASS",
+      "width": 1440,
+      "javaScriptEnabled": false,
+      "nativeForms": true,
+      "resendCooldown": true,
+      "sidRotated": true,
+      "smtpOTPReceived": true,
+      "smtpResetReceived": true,
+      "keyboardTabFocusEnter": true,
+      "paginationBothLists": true,
+      "history": true,
+      "csrf403": true,
+      "logoutAndResetRevokeSession": true,
+      "cookies": [
+        {
+          "name": "sid",
+          "value": "[REDACTED]",
+          "httpOnly": true,
+          "sameSite": "Lax",
+          "secure": false,
+          "path": "/"
+        }
+      ]
+    },
+    {
+      "name": "auth-375-js",
+      "status": "PASS",
+      "width": 375,
+      "javaScriptEnabled": true,
+      "nativeForms": true,
+      "resendCooldown": true,
+      "sidRotated": true,
+      "smtpOTPReceived": true,
+      "smtpResetReceived": true,
+      "keyboardTabFocusEnter": true,
+      "paginationBothLists": true,
+      "history": true,
+      "csrf403": true,
+      "logoutAndResetRevokeSession": true,
+      "cookies": [
+        {
+          "name": "sid",
+          "value": "[REDACTED]",
+          "httpOnly": true,
+          "sameSite": "Lax",
+          "secure": false,
+          "path": "/"
+        }
+      ]
+    },
+    {
+      "name": "auth-375-nojs",
+      "status": "PASS",
+      "width": 375,
+      "javaScriptEnabled": false,
+      "nativeForms": true,
+      "resendCooldown": true,
+      "sidRotated": true,
+      "smtpOTPReceived": true,
+      "smtpResetReceived": true,
+      "keyboardTabFocusEnter": true,
+      "paginationBothLists": true,
+      "history": true,
+      "csrf403": true,
+      "logoutAndResetRevokeSession": true,
+      "cookies": [
+        {
+          "name": "sid",
+          "value": "[REDACTED]",
+          "httpOnly": true,
+          "sameSite": "Lax",
+          "secure": false,
+          "path": "/"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    "auth-1440-js-register.png",
+    "auth-1440-js-resend-cooldown.png",
+    "auth-1440-js-pending-login.png",
+    "auth-1440-js-otp-invalid.png",
+    "auth-1440-js-activated-login.png",
+    "auth-1440-js-dishes-pagination.png",
+    "auth-1440-js-admin-pagination.png",
+    "auth-1440-js-session-after-restart.png",
+    "auth-1440-js-forgot.png",
+    "auth-1440-js-forgot-sent.png",
+    "auth-1440-js-reset-form.png",
+    "auth-1440-js-reset-success-login.png",
+    "auth-1440-js-reset-used.png",
+    "auth-1440-nojs-register.png",
+    "auth-1440-nojs-resend-cooldown.png",
+    "auth-1440-nojs-pending-login.png",
+    "auth-1440-nojs-otp-invalid.png",
+    "auth-1440-nojs-activated-login.png",
+    "auth-1440-nojs-dishes-pagination.png",
+    "auth-1440-nojs-admin-pagination.png",
+    "auth-1440-nojs-forgot.png",
+    "auth-1440-nojs-forgot-sent.png",
+    "auth-1440-nojs-reset-form.png",
+    "auth-1440-nojs-reset-success-login.png",
+    "auth-1440-nojs-reset-used.png",
+    "auth-375-js-register.png",
+    "auth-375-js-resend-cooldown.png",
+    "auth-375-js-pending-login.png",
+    "auth-375-js-otp-invalid.png",
+    "auth-375-js-activated-login.png",
+    "auth-375-js-dishes-pagination.png",
+    "auth-375-js-admin-pagination.png",
+    "auth-375-js-forgot.png",
+    "auth-375-js-forgot-sent.png",
+    "auth-375-js-reset-form.png",
+    "auth-375-js-reset-success-login.png",
+    "auth-375-js-reset-used.png",
+    "auth-375-nojs-register.png",
+    "auth-375-nojs-resend-cooldown.png",
+    "auth-375-nojs-pending-login.png",
+    "auth-375-nojs-otp-invalid.png",
+    "auth-375-nojs-activated-login.png",
+    "auth-375-nojs-dishes-pagination.png",
+    "auth-375-nojs-admin-pagination.png",
+    "auth-375-nojs-forgot.png",
+    "auth-375-nojs-forgot-sent.png",
+    "auth-375-nojs-reset-form.png",
+    "auth-375-nojs-reset-success-login.png",
+    "auth-375-nojs-reset-used.png"
+  ],
+  "network": [
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/register",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/register",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/activate/resend",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/logout",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 403,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/forgot",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/forgot",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/forgot/sent",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "POST",
+      "url": "/reset",
+      "status": 303,
+      "origin": "null",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-js",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/register",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/register",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/activate/resend",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/activate",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/activate",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/logout",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 403,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/forgot",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/forgot",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/forgot/sent",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "POST",
+      "url": "/reset",
+      "status": 303,
+      "origin": "null",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-1440-nojs",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/register",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/register",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/activate/resend",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/activate",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/logout",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/login",
+      "status": 403,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/forgot",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/forgot",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/forgot/sent",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "POST",
+      "url": "/reset",
+      "status": 303,
+      "origin": "null",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-js",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/register",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/register",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/activate/resend",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/activate",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/activate",
+      "status": 200,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/activate",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes?q=Ph%E1%BB%9F&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/dishes?page=1&q=Ph%E1%BB%9F&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=10&page=2",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/admin/dishes?page=1&q=Ph%E1%BB%9F&category=M%C3%B3n+th%E1%BB%AD&status=available&sort=name&pageSize=20",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/logout",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/login",
+      "status": 403,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/forgot",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/forgot",
+      "status": 303,
+      "origin": "http://localhost:3109",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/forgot/sent",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "POST",
+      "url": "/reset",
+      "status": 303,
+      "origin": "null",
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    },
+    {
+      "case": "auth-375-nojs",
+      "method": "GET",
+      "url": "/reset?token=%5BREDACTED%5D",
+      "status": 200,
+      "origin": null,
+      "fetchSite": null
+    }
+  ],
+  "database": {
+    "source": "Prisma reads from the isolated real PostgreSQL test schema; up to 50 auth rows per table",
+    "users": [
+      {
+        "status": "active",
+        "role": "viewer",
+        "verified": true,
+        "passwordAlgorithm": "Argon2id",
+        "passwordHash": "[REDACTED]"
+      },
+      {
+        "status": "active",
+        "role": "viewer",
+        "verified": true,
+        "passwordAlgorithm": "Argon2id",
+        "passwordHash": "[REDACTED]"
+      },
+      {
+        "status": "active",
+        "role": "viewer",
+        "verified": true,
+        "passwordAlgorithm": "Argon2id",
+        "passwordHash": "[REDACTED]"
+      },
+      {
+        "status": "active",
+        "role": "viewer",
+        "verified": true,
+        "passwordAlgorithm": "Argon2id",
+        "passwordHash": "[REDACTED]"
+      },
+      {
+        "status": "active",
+        "role": "viewer",
+        "verified": true,
+        "passwordAlgorithm": "Argon2id",
+        "passwordHash": "[REDACTED]"
+      }
+    ],
+    "activations": [
+      {
+        "attempts": 1,
+        "lockedUntil": null,
+        "expiresAt": "2026-11-06T03:01:31.330Z",
+        "usedAt": "2026-11-06T02:51:40.653Z",
+        "sendCount": 2,
+        "otpHashStored": true,
+        "otpHash": "[REDACTED]"
+      },
+      {
+        "attempts": 1,
+        "lockedUntil": null,
+        "expiresAt": "2026-11-06T03:04:03.836Z",
+        "usedAt": "2026-11-06T02:54:15.294Z",
+        "sendCount": 2,
+        "otpHashStored": true,
+        "otpHash": "[REDACTED]"
+      },
+      {
+        "attempts": 1,
+        "lockedUntil": null,
+        "expiresAt": "2026-11-06T03:02:48.025Z",
+        "usedAt": "2026-11-06T02:53:00.269Z",
+        "sendCount": 2,
+        "otpHashStored": true,
+        "otpHash": "[REDACTED]"
+      },
+      {
+        "attempts": 1,
+        "lockedUntil": null,
+        "expiresAt": "2026-11-06T03:05:33.192Z",
+        "usedAt": "2026-11-06T02:55:46.556Z",
+        "sendCount": 2,
+        "otpHashStored": true,
+        "otpHash": "[REDACTED]"
+      }
+    ],
+    "resets": [
+      {
+        "expiresAt": "2026-11-06T03:08:36.911Z",
+        "usedAt": "2026-11-06T02:53:40.785Z",
+        "tokenHashStored": true,
+        "tokenHash": "[REDACTED]"
+      },
+      {
+        "expiresAt": "2026-11-06T03:11:32.970Z",
+        "usedAt": "2026-11-06T02:56:40.536Z",
+        "tokenHashStored": true,
+        "tokenHash": "[REDACTED]"
+      },
+      {
+        "expiresAt": "2026-11-06T03:07:16.389Z",
+        "usedAt": "2026-11-06T02:52:20.605Z",
+        "tokenHashStored": true,
+        "tokenHash": "[REDACTED]"
+      },
+      {
+        "expiresAt": "2026-11-06T03:09:53.051Z",
+        "usedAt": "2026-11-06T02:54:56.892Z",
+        "tokenHashStored": true,
+        "tokenHash": "[REDACTED]"
+      }
+    ],
+    "sessions": [
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:22:12.093Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:26:41.422Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:22:07.335Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:23:44.764Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:23:42.255Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:23:31.862Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:22:22.180Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:24:47.718Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:21:08.718Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:26:26.661Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:21:08.545Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:26:43.157Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:22:24.059Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:24:59.678Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:22:06.726Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      },
+      {
+        "authenticated": false,
+        "expiresAt": "2026-11-06T03:25:02.606Z",
+        "sid": "[REDACTED]",
+        "userId": "[REDACTED]"
+      }
+    ],
+    "counters": [
+      {
+        "key": "activate-resend:ip:[REDACTED]",
+        "count": 2,
+        "windowStart": "2026-11-06T02:55:23.707Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "activate:email:[REDACTED]",
+        "count": 2,
+        "windowStart": "2026-11-06T02:55:40.948Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "activate:ip:[REDACTED]",
+        "count": 2,
+        "windowStart": "2026-11-06T02:55:40.331Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "captcha:ip:[REDACTED]",
+        "count": 1,
+        "windowStart": "2026-11-06T02:55:06.890Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "forgot:email:[REDACTED]",
+        "count": 1,
+        "windowStart": "2026-11-06T02:56:32.570Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "forgot:ip:[REDACTED]",
+        "count": 1,
+        "windowStart": "2026-11-06T02:56:31.955Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "login:ip:[REDACTED]",
+        "count": 2,
+        "windowStart": "2026-11-06T02:55:36.438Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "register:ip:[REDACTED]",
+        "count": 1,
+        "windowStart": "2026-11-06T02:55:09.560Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "resend:hour:[REDACTED]",
+        "count": 2,
+        "windowStart": "2026-11-06T02:55:15.712Z",
+        "lockedUntil": null
+      },
+      {
+        "key": "resend:minute:[REDACTED]",
+        "count": 1,
+        "windowStart": "2026-11-06T02:55:31.293Z",
+        "lockedUntil": null
+      }
+    ],
+    "crudCounts": {
+      "dishes": 31,
+      "chefs": 0,
+      "ingredients": 0
+    }
+  },
+  "completedAt": "2026-11-06T02:56:47.079Z",
+  "status": "PASS"
+}

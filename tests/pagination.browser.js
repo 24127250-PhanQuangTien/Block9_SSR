@@ -53,7 +53,9 @@ async function contextFor(width, javaScriptEnabled) {
 
 async function login(context) {
   const page = await context.newPage();
-  const redirected = await page.goto(base + "/dishes", { waitUntil: "domcontentloaded" });
+  const publicMenu = await context.request.get(base + "/dishes", { maxRedirects: 0 });
+  assert.equal(publicMenu.status(), 200);
+  const redirected = await page.goto(base + "/admin/dishes", { waitUntil: "domcontentloaded" });
   const denied = await redirected.request().redirectedFrom().response();
   assert.equal(denied.status(), 303);
   assert.equal(denied.headers().location, "/login");

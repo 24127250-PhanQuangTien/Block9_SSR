@@ -9,11 +9,22 @@ module.exports = async function run({ db, base, password, policy, security, mess
   const report = { data: "Real Chrome + real HTTP/Prisma/PostgreSQL in isolated test schema; local SMTP", startedAt: new Date().toISOString(), chrome: browser.version(), checks: [], screenshots: [], network: [] };
   async function submit(page, action, values) {
     const form = page.locator(`form[action="${action}"]`).first();
-    for (const [name, value] of Object.entries(values)) await form.locator(`[name="${name}"]`).fill(value);
+    for (const [name, value] of Object.entries(values))
+    {
+      const field = form.locator(`[name="${name}"]`);
+      if (await field.getAttribute("type") === "hidden")
+      {
+        assert.equal(await field.inputValue(), value);
+      }
+      else
+      {
+        await field.fill(value);
+      }
+    }
     await Promise.all([page.waitForNavigation({ waitUntil: "domcontentloaded" }), form.locator('button[type="submit"]').click()]);
   }
   async function photo(page, label) {
-    await page.screenshot({ path: path.join(evidence, label + ".png"), fullPage: true, animations: "disabled", mask: [page.locator("input, .auth-captcha [role=img], .auth-account__email")] });
+    await page.screenshot({ path: path.join(evidence, label + ".png"), fullPage: true, animations: "disabled", mask: [page.locator("input, .auth-captcha [role=img], .auth-account__email, .auth-activation-email")] });
     report.screenshots.push(label + ".png");
   }
   async function noOverflow(page) {
@@ -35,7 +46,9 @@ module.exports = async function run({ db, base, password, policy, security, mess
           report.network.push({ case: label, method: response.request().method(), url: safeURL(response.url(), base), status: response.status(), origin: headers.origin || null, fetchSite: headers["sec-fetch-site"] || null });
         }
       });
-      for (const area of ["/dishes", "/admin/dishes"]) {
+      const publicMenu = await context.request.get(base + "/dishes?pageSize=10&page=1", { maxRedirects: 0 });
+      assert.equal(publicMenu.status(), 200);
+      for (const area of ["/admin/dishes", "/admin/chefs", "/admin/ingredients"]) {
         const denied = await context.request.get(base + area, { maxRedirects: 0 });
         assert.equal(denied.status(), 303); assert.equal(denied.headers().location, "/login");
       }
@@ -45,6 +58,8 @@ module.exports = async function run({ db, base, password, policy, security, mess
       const mailBefore = inbox.length;
       await submit(page, "/register", { email, password, captcha: challenge.answer });
       assert.equal(new URL(page.url()).pathname, "/activate");
+      assert.equal(await page.locator('input[type="email"]').count(), 0);
+      assert.equal(await page.locator('.auth-activation-email').textContent().then(value => value.includes(email)), true);
       const user = await db.user.findUnique({ where: { email } }); assert.equal(user.status, "pending"); assert.equal(user.role, "viewer");
       let activationMail = await message(email, mailBefore, body => body.includes("Mã kích hoạt:"));
       step = "resend cooldown initial disabled state";
@@ -161,7 +176,7 @@ module.exports = async function run({ db, base, password, policy, security, mess
       step = "CSRF and logout";
       assert.equal(csrfDenied.status(), 403);
       await submit(page, "/logout", {}); assert.equal(new URL(page.url()).pathname, "/login");
-      const revoked = await context.request.get(base + "/dishes", { headers: { Cookie: "sid=" + authenticatedCookie.value }, maxRedirects: 0 });
+      const revoked = await context.request.get(base + "/admin/dishes", { headers: { Cookie: "sid=" + authenticatedCookie.value }, maxRedirects: 0 });
       assert.equal(revoked.status(), 303);
       await submit(page, "/login", { email, password });
       const preResetSid = (await context.cookies()).find(cookie => cookie.name === "sid")?.value;
@@ -180,7 +195,7 @@ module.exports = async function run({ db, base, password, policy, security, mess
       await submit(page, "/reset", { password: changed }); assert.equal(new URL(page.url()).pathname, "/login");
       await photo(page, label + "-reset-success-login");
       assert.equal(await db.session.count({ where: { userId: user.id } }), 0);
-      const oldSession = await context.request.get(base + "/dishes", { headers: { Cookie: "sid=" + preResetSid }, maxRedirects: 0 }); assert.equal(oldSession.status(), 303);
+      const oldSession = await context.request.get(base + "/admin/dishes", { headers: { Cookie: "sid=" + preResetSid }, maxRedirects: 0 }); assert.equal(oldSession.status(), 303);
       await page.goto(base + "/reset?token=" + raw); assert.equal(await page.locator('[data-error-code="INVALID_RESET"]').count(), 1);
       await photo(page, label + "-reset-used");
       report.checks.push({ name: label, status: "PASS", width, javaScriptEnabled, nativeForms: true, resendCooldown: true, sidRotated: true, smtpOTPReceived: true, smtpResetReceived: true, keyboardTabFocusEnter: true, paginationBothLists: true, history: true, csrf403: true, logoutAndResetRevokeSession: true, cookies: [{ name: "sid", value: "[REDACTED]", httpOnly: authenticatedCookie.httpOnly, sameSite: authenticatedCookie.sameSite, secure: authenticatedCookie.secure, path: authenticatedCookie.path }] });

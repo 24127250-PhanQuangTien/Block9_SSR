@@ -1,5 +1,10 @@
 # Audit Authentication Block8 — source hiện tại
 
+> **Cập nhật phạm vi theo yêu cầu mới:** `/dishes` và `/dishes/:id` được xem công khai; toàn bộ `/admin/*` và logout vẫn cần session hợp lệ. Trang kích hoạt dùng lại email từ phiên, hiển thị một lần thay cho hai ô nhập. Các số liệu và ma trận audit cũ bên dưới thuộc lượt ghi nhận trước thay đổi này; không dùng chúng để tự kết luận đã tái kiểm source mới. Phạm vi public menu là điều chỉnh có chủ đích so với prompt gốc.
+
+**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](docs/evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](docs/evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
+
+
 Ngày đối chiếu:04/11/2026. Repository gốc: `ChuHaiLi/Web-Block5`, nhánh main; cùng source được công bố tại `ChuHaiLi/Web-Block8`. Báo cáo này thay bản audit trước khắc phục; không dùng các line number, kết luận30/34 hoặc trạng thái SMTP cũ làm kết luận hiện tại.
 
 ## 1. Kết luận và phạm vi

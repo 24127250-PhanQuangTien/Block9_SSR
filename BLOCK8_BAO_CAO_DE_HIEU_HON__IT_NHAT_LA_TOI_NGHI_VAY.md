@@ -7,7 +7,7 @@
 
 **Cách đọc:** Tên file trong các dòng **Mã nguồn liên quan** là đường dẫn tính từ thư mục gốc của repository. Số dòng bên cạnh giúp tìm đoạn mã tương ứng; có thể nhấn vào liên kết để mở ngay trên GitHub. Các số dòng được đối chiếu với source hiện tại và có thể thay đổi khi code được sửa; đây không phải một lượt kiểm thử mới.
 
-> Báo cáo này diễn giải lại kết quả Codex đã ghi nhận, **không phải một lượt tự kiểm thử mã nguồn mới**. Những nội dung chưa được chứng minh vẫn được ghi rõ, không tự đổi thành PASS.
+> Báo cáo này diễn giải lại bản audit ngày 04/11. Các số liệu audit bên dưới thuộc lần ghi nhận đó; phần hành vi và mã nguồn đã được cập nhật theo yêu cầu mới về thực đơn công khai và trang kích hoạt. Những nội dung chưa được chứng minh vẫn được ghi rõ, không tự đổi thành PASS.
 
 ## 1. Kết luận chung
 
@@ -17,7 +17,7 @@ Người dùng cũng đã tự xác nhận thử thành công chuỗi: **đăng 
 
 Tuy nhiên, **chưa thể nói đã hoàn tất 100% phần nghiệm thu/nộp bài**. Nhóm vẫn phải chuẩn bị ảnh minh chứng đúng từng tình huống và sơ đồ tự vẽ theo yêu cầu slide 63. Một vài giới hạn kỹ thuật cũng cần được giải thích trung thực.
 
-### Kết quả kiểm thử được ghi nhận
+### Kết quả kiểm thử của bản audit ngày 04/11
 
 | Hình thức | Kết quả | Hiểu đơn giản |
 |---|---:|---|
@@ -28,7 +28,9 @@ Tuy nhiên, **chưa thể nói đã hoàn tất 100% phần nghiệm thu/nộp b
 
 Các bài kiểm tra offline dùng dữ liệu mô phỏng trong bộ nhớ (fixture), không kết nối database thật. Kiểm thử HTTP và Chrome dùng schema PostgreSQL thử riêng và đã dọn sau khi chạy; không ghi dữ liệu vào schema nhà hàng chính.
 
-**Đánh giá theo 34 tiêu chí do báo cáo audit tổng hợp từ slide 57–61:** 33 PASS, 0 FAIL, 1 PARTIAL.  
+**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
+
+**Đánh giá theo 34 tiêu chí do bản audit ngày 04/11 tổng hợp từ slide 57–61:** 33 PASS, 0 FAIL, 1 PARTIAL.
 **Nếu tính thêm yêu cầu về timing do nhóm bổ sung:** 32 PASS, 0 FAIL, 2 PARTIAL.
 
 Hai cách đếm khác nhau vì **slide của thầy không bắt buộc chứng minh thời gian phản hồi Forgot Password là tương đương**. Không nên coi kết quả 33/34 là “đã hoàn thành 97% toàn bộ bài”, bởi đây không phải bảng điểm chính thức của thầy và còn hồ sơ nghiệm thu ngoài 34 tiêu chí này.
@@ -37,10 +39,16 @@ Hai cách đếm khác nhau vì **slide của thầy không bắt buộc chứng
 
 ### 2.1. Đăng ký và kích hoạt tài khoản
 
-**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L33-L89) (dòng 33–89) · [`src/services/otp.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/otp.js#L6-L45) (dòng 6–45) · [`src/services/crypto.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L7-L18) (dòng 7–18) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L47-L77) (dòng 47–77)
+**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L40-L101) (dòng 40–101) · [`src/services/otp.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/otp.js#L6-L45) (dòng 6–45) · [`src/services/crypto.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L7-L18) (dòng 7–18) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L47-L77) (dòng 47–77) · [`src/views/auth/activate.ejs`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/views/auth/activate.ejs#L2-L23) (dòng 2–23)
 
 
 Khi đăng ký, người dùng điền thông tin và giải CAPTCHA. Server kiểm tra dữ liệu, băm mật khẩu rồi tạo tài khoản ở trạng thái **Pending (chờ kích hoạt)**. Hệ thống gửi OTP qua email; nhập đúng OTP thì tài khoản chuyển thành **Active (đã kích hoạt)**.
+
+**Chuẩn hóa email là gì?** Là đưa email về một cách viết thống nhất trước khi lưu và so sánh. Project xóa khoảng trắng ở đầu và cuối bằng `trim()`, rồi chuyển toàn bộ email thành chữ thường bằng `toLowerCase()`.
+
+Ví dụ: `"  NguyenVanA@Example.com  "` được chuẩn hóa thành `"nguyenvana@example.com"`. Nhờ vậy, viết hoa hoặc thừa khoảng trắng ở đầu/cuối không làm cùng một email bị hiểu thành hai tài khoản khác nhau. Bản nhập ban đầu được giữ ở `emailRaw`, còn email đã chuẩn hóa được lưu ở `email`.
+
+Trang kích hoạt dùng lại email đã đăng ký trong phiên và chỉ hiển thị email đó một lần dưới dạng văn bản. Người dùng chỉ cần nhập OTP hoặc bấm gửi lại mã, không phải nhập email thêm lần nữa. Nếu phiên chưa có email cần kích hoạt, trang hướng dẫn quay lại đăng ký hoặc đăng nhập tài khoản chưa kích hoạt.
 
 Các điểm quan trọng:
 
@@ -54,7 +62,7 @@ Các điểm quan trọng:
 
 ### 2.2. CAPTCHA chống đăng ký tự động
 
-**Mã nguồn liên quan:** [`src/services/captcha.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/captcha.js#L5-L21) (dòng 5–21) · [`src/config/authPolicy.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/config/authPolicy.js#L6-L7) (dòng 6–7) · [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L24-L33) (dòng 24–33 và [98–112](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L98-L112)) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L92-L102) (dòng 92–102)
+**Mã nguồn liên quan:** [`src/services/captcha.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/captcha.js#L5-L21) (dòng 5–21) · [`src/config/authPolicy.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/config/authPolicy.js#L6-L7) (dòng 6–7) · [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L25-L40) (dòng 25–40 và [110–124](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L110-L124)) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L92-L102) (dòng 92–102)
 
 
 Website sử dụng CAPTCHA dạng ảnh gồm **5 ký tự**. Việc yêu cầu người dùng nhập lại nội dung trong ảnh giúp hạn chế thao tác tự động đơn giản bằng cách tăng chi phí vượt qua form.
@@ -69,7 +77,7 @@ Website sử dụng CAPTCHA dạng ảnh gồm **5 ký tự**. Việc yêu cầu
 
 ### 2.3. Đăng nhập và chống đoán mật khẩu
 
-**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L91-L122) (dòng 91–122) · [`src/services/rateLimit.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/rateLimit.js#L2-L19) (dòng 2–19) · [`src/config/authPolicy.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/config/authPolicy.js#L7-L8) (dòng 7–8)
+**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L103-L139) (dòng 103–139) · [`src/services/rateLimit.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/rateLimit.js#L2-L19) (dòng 2–19) · [`src/config/authPolicy.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/config/authPolicy.js#L7-L8) (dòng 7–8)
 
 
 Khi người dùng đăng nhập, server kiểm tra email, mật khẩu, trạng thái Active và các giới hạn bảo mật.
@@ -84,7 +92,7 @@ Khi người dùng đăng nhập, server kiểm tra email, mật khẩu, trạng
 
 ### 2.4. Session và Cookie: ghi nhớ người đã đăng nhập
 
-**Mã nguồn liên quan:** [`src/app.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/app.js#L36-L40) (dòng 36–40) · [`src/services/sessionStore.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/sessionStore.js#L5-L39) (dòng 5–39) · [`src/middleware/requireLogin.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/requireLogin.js#L2-L19) (dòng 2–19) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L114-L123) (dòng 114–123)
+**Mã nguồn liên quan:** [`src/app.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/app.js#L36-L40) (dòng 36–40) · [`src/services/sessionStore.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/sessionStore.js#L5-L39) (dòng 5–39) · [`src/middleware/requireLogin.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/requireLogin.js#L2-L28) (dòng 2–28) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L114-L123) (dòng 114–123)
 
 
 Có thể hiểu **Cookie là tấm thẻ mang mã số**, còn **Session là hồ sơ đăng nhập được server lưu trong database**.
@@ -103,7 +111,7 @@ Sau khi đăng nhập thành công, trình duyệt giữ Cookie chứa mã `sid`
 
 ### 2.5. Quên mật khẩu và đặt lại mật khẩu
 
-**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L130-L181) (dòng 130–181) · [`src/services/crypto.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L5-L11) (dòng 5–11) · [`src/services/mail.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mail.js#L14-L28) (dòng 14–28) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L79-L90) (dòng 79–90)
+**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L147-L198) (dòng 147–198) · [`src/services/crypto.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L5-L11) (dòng 5–11) · [`src/services/mail.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mail.js#L14-L28) (dòng 14–28) · [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma#L79-L90) (dòng 79–90)
 
 
 Người dùng nhập email ở trang **Forgot Password**. Nếu tài khoản tồn tại, hệ thống tạo một liên kết đặt lại mật khẩu và gửi qua email. Liên kết có chứa một mã bí mật (reset token) chỉ được dùng một lần, có hiệu lực **15 phút**.
@@ -118,10 +126,12 @@ Người dùng nhập email ở trang **Forgot Password**. Nếu tài khoản t�
 
 ### 2.6. Bảo vệ các trang quản lý nhà hàng
 
-**Mã nguồn liên quan:** [`src/app.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/app.js#L57-L64) (dòng 57–64) · [`src/middleware/requireLogin.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/requireLogin.js#L3-L19) (dòng 3–19) · [`src/middleware/csrf.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/csrf.js#L13-L24) (dòng 13–24)
+**Mã nguồn liên quan:** [`src/app.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/app.js#L57-L64) (dòng 57–64) · [`src/middleware/requireLogin.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/requireLogin.js#L3-L28) (dòng 3–28) · [`src/middleware/csrf.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/csrf.js#L13-L24) (dòng 13–24)
 
 
-Sau khi bổ sung Authentication, các trang xem/thêm/sửa/xóa của phần quản lý nhà hàng đều cần đăng nhập. Nếu chưa đăng nhập mà cố truy cập trực tiếp bằng URL hoặc gửi yêu cầu, server sẽ chặn.
+Trang thực đơn `/dishes` và trang chi tiết món ăn `/dishes/:id` được xem công khai, không cần đăng nhập. Tìm kiếm và phân trang SSR ở trang khách vẫn hoạt động bình thường.
+
+Các trang xem/thêm/sửa/xóa trong khu vực quản trị `/admin/*` mới yêu cầu đăng nhập. Nếu chưa đăng nhập mà truy cập URL quản trị hoặc gửi yêu cầu tạo/sửa/xóa trực tiếp, server chuyển về `/login`. Đây là phạm vi được điều chỉnh theo yêu cầu mới của người dùng.
 
 Hệ thống còn kiểm tra **CSRF**: mã bảo vệ để tránh việc một website khác lừa trình duyệt của người đang đăng nhập thực hiện thao tác ngoài ý muốn.
 
@@ -153,7 +163,7 @@ Các bộ đếm nằm trong database, không chỉ lưu ở trình duyệt. Đi
 
 ### 4.1. GET có ghi metadata bảo mật
 
-**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L24-L33) (dòng 24–33 và [151–156](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L151-L156)) · [`src/services/captcha.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/captcha.js#L5-L10) (dòng 5–10) · [`src/services/sessionStore.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/sessionStore.js#L13-L38) (dòng 13–38) · [`src/middleware/csrf.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/csrf.js#L3-L12) (dòng 3–12)
+**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L25-L40) (dòng 25–40 và [168–173](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L168-L173)) · [`src/services/captcha.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/captcha.js#L5-L10) (dòng 5–10) · [`src/services/sessionStore.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/sessionStore.js#L13-L38) (dòng 13–38) · [`src/middleware/csrf.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/middleware/csrf.js#L3-L12) (dòng 3–12)
 
 
 Theo cách hiểu thông thường, **GET dùng để xem dữ liệu**, không phải để thực hiện các thao tác thay đổi nghiệp vụ.
@@ -169,7 +179,7 @@ Tuy nhiên, khi mở trang đăng ký, server cần tạo CAPTCHA và có thể 
 
 ### 4.2. Timing của Forgot Password còn chênh lệch
 
-**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L19) (dòng 19 và [131–147](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L131-L147)) · [`src/services/mail.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mail.js#L14-L28) (dòng 14–28)
+**Mã nguồn liên quan:** [`src/routes/auth.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L20) (dòng 20 và [148–164](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L148-L164)) · [`src/services/mail.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mail.js#L14-L28) (dòng 14–28)
 
 
 Khi nhập email đã có tài khoản, server phải xử lý tạo mã đặt lại mật khẩu; email chưa đăng ký không cần những bước giống hệt. Do đó, **thời gian phản hồi có thể khác nhau** dù người dùng nhìn thấy cùng thông báo.
@@ -215,7 +225,7 @@ Những hạn chế này **không có nghĩa các chức năng đang thất bạ
 
 **Block 8 đã đạt các kiểm thử được báo cáo đối với những chức năng xác thực chính.** Luồng nhận OTP qua email thật, kích hoạt, đăng nhập và vào danh sách món ăn cũng đã được người dùng tự xác nhận.
 
-**Về 34 tiêu chí do báo cáo audit tổng hợp từ slide 57–61:** 33 đạt, 1 đạt một phần do GET vẫn ghi metadata bảo mật. Nếu xét thêm yêu cầu chống dò email qua thời gian phản hồi của nhóm, kết quả vẫn tính trên 34 tiêu chí: 32 đạt và 2 đạt một phần.
+**Về 34 tiêu chí do bản audit ngày 04/11 tổng hợp từ slide 57–61:** 33 đạt, 1 đạt một phần do GET vẫn ghi metadata bảo mật. Nếu xét thêm yêu cầu chống dò email qua thời gian phản hồi của nhóm, kết quả vẫn tính trên 34 tiêu chí: 32 đạt và 2 đạt một phần.
 
 **Về việc nộp bài:** Chưa nên nói “xong hết 100%” vì nhóm còn cần hoàn thiện bằng chứng DevTools cho từng tình huống, sơ đồ tự vẽ và tự kiểm tra những luồng chưa trải nghiệm thực tế. Nên ưu tiên các việc này trước khi tiếp tục chỉnh sửa mã không cần thiết.
 
@@ -238,7 +248,7 @@ Nếu cần giải thích với thầy hoặc tự đọc code, có thể bắt 
 | Các bảng User, OTP, Session, CAPTCHA, RateLimit, Reset | [`prisma/schema.prisma`](https://github.com/ChuHaiLi/Web-Block8/blob/main/prisma/schema.prisma) |
 | Gửi email và chẩn đoán lỗi mail | [`src/services/mail.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mail.js) và [`src/services/mailDiagnostics.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/mailDiagnostics.js) |
 | Kiểm thử tích hợp | [`tests/auth.integration.js`](https://github.com/ChuHaiLi/Web-Block8/blob/main/tests/auth.integration.js) |
-| Kết quả HTTP và Chrome đã lưu | [`docs/evidence/auth-release-http/http-results.json`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-release-http/http-results.json) và [`docs/evidence/auth-release-browser/browser-results.json`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-release-browser/browser-results.json) |
+| Kết quả HTTP và Chrome của audit 04/11 | [`docs/evidence/auth-release-http/http-results.json`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-release-http/http-results.json) và [`docs/evidence/auth-release-browser/browser-results.json`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/evidence/auth-release-browser/browser-results.json) |
 | Hướng dẫn tự nghiệm thu và sơ đồ tham khảo | [`docs/VERIFY.md`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/VERIFY.md) và [`docs/flows.md`](https://github.com/ChuHaiLi/Web-Block8/blob/main/docs/flows.md) |
 
 *Lưu ý:* Những đường dẫn trên giúp lần theo code và bằng chứng; bản Markdown này ưu tiên giải thích hành vi, chỉ kèm số dòng ở phần Mã nguồn liên quan để tiện tra cứu, không chép lại toàn bộ chi tiết các test case.

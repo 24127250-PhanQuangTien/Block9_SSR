@@ -67,7 +67,7 @@ async function startBrowserEvidence({ base, evidence }) {
         if (observation?.method === "GET") route += requested.search;
         await page.goto(base + route, { waitUntil: "networkidle" });
         const ui = label + "-ui.png";
-        await page.screenshot({ path: path.join(evidence, ui), fullPage: true, mask: [page.locator("input, .auth-captcha [role=img], .auth-account__email")] });
+        await page.screenshot({ path: path.join(evidence, ui), fullPage: true, mask: [page.locator("input, .auth-captcha [role=img], .auth-account__email, .auth-activation-email")] });
         const cookies = (await context.cookies()).map(({ name: cookieName, httpOnly, secure, sameSite, path: cookiePath, expires }) => ({ name: cookieName, value: "[REDACTED]", httpOnly, secure, sameSite, path: cookiePath, expires }));
         const html = panelHTML({ name, snapshot, requests: [...requests, ...browserNetwork], cookies, ui });
         await fs.writeFile(path.join(evidence, label + ".html"), html);
