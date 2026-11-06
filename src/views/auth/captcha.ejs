@@ -2,8 +2,8 @@
   <div class="auth-captcha">
     <div role="img" aria-label="Mã xác nhận bảo vệ tài khoản"><%- challenge.svg %></div>
     <input type="hidden" name="challengeId" value="<%= challenge.challengeId %>">
-    <label for="captcha">Nhập mã xác nhận (không phân biệt hoa thường)</label>
+    <label for="captcha">Nhập mã xác thực (không phân biệt hoa thường)</label>
     <input id="captcha" name="captcha" autocomplete="off" maxlength="32" required>
-    <a href="/captcha/new?purpose=<%= purpose %>">Đổi mã bằng tải lại trang</a>
+    <a href="/captcha/new?purpose=<%= purpose %>">Đổi mã xác thực</a>
   </div>
 <% } %>
