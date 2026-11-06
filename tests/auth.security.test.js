@@ -3,6 +3,36 @@ const assert = require("node:assert/strict");
 const { execFileSync } = require("node:child_process");
 const { safeURL, cookieFlags } = require("./helpers/authEvidence");
 
+test("resend cooldown uses public budgets, survives reload and respects longer limits without reading accounts", async () =>
+{
+  const { resendCooldown } = require("../src/services/resendCooldown");
+  const { policy } = require("../src/config/authPolicy");
+  const now = new Date("2026-11-06T00:00:00Z");
+  const email = "cooldown@example.test";
+  const rows = new Map();
+  const db = {
+    rateLimit: {
+      async findUnique({ where })
+      {
+        return rows.get(where.key) || null;
+      },
+    },
+  };
+  assert.equal(await resendCooldown(db, "test-ip", email, now), 0);
+  const minute = { count: 1, windowStart: new Date(+now - 15000), lockedUntil: null };
+  rows.set(`resend:minute:${email}`, minute);
+  assert.equal(await resendCooldown(db, "test-ip", email, now), 45000);
+  assert.equal(await resendCooldown(db, "test-ip", email, new Date(+now + 5000)), 40000);
+  assert.equal(await resendCooldown(db, "test-ip", email, new Date(+now + 45000)), 0);
+  assert.deepEqual(minute, { count: 1, windowStart: new Date(+now - 15000), lockedUntil: null });
+  rows.set(`resend:hour:${email}`, { count: policy.resendLimit, windowStart: new Date(+now - 1000), lockedUntil: null });
+  assert.equal(await resendCooldown(db, "test-ip", email, now), policy.resendWindow - 1000);
+  rows.clear();
+  rows.set("activate-resend:ip:test-ip", { count: policy.activationLimit, windowStart: now, lockedUntil: null });
+  assert.equal(await resendCooldown(db, "test-ip", email, now), policy.loginWindow);
+  assert.equal(await resendCooldown(db, "test-ip", "absent@example.test", now), policy.loginWindow);
+});
+
 test("mail diagnostics identify authentication/network/TLS failures without copying provider secrets", () =>
 {
   const { mailDiagnostic } = require("../src/services/mailDiagnostics");

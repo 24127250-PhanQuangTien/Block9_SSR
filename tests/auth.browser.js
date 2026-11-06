@@ -46,7 +46,50 @@ module.exports = async function run({ db, base, password, policy, security, mess
       await submit(page, "/register", { email, password, captcha: challenge.answer });
       assert.equal(new URL(page.url()).pathname, "/activate");
       const user = await db.user.findUnique({ where: { email } }); assert.equal(user.status, "pending"); assert.equal(user.role, "viewer");
-      const activationMail = await message(email, mailBefore, body => body.includes("Mã kích hoạt:"));
+      let activationMail = await message(email, mailBefore, body => body.includes("Mã kích hoạt:"));
+      step = "resend cooldown initial disabled state";
+      const resendForm = page.locator('[data-resend-form]');
+      const resendButton = resendForm.locator('[data-resend-button]');
+      assert.equal(await resendButton.isDisabled(), true);
+      const firstWait = Number(await resendForm.getAttribute("data-resend-wait-ms"));
+      assert.ok(firstWait > 0 && firstWait <= policy.resendDelay);
+      if (javaScriptEnabled)
+      {
+        const firstLabel = await resendForm.locator('[data-resend-countdown]').textContent();
+        await page.waitForFunction(label => document.querySelector('[data-resend-countdown]').textContent !== label, firstLabel);
+      }
+      step = "resend cooldown after reload";
+      await page.reload();
+      assert.equal(await resendButton.isDisabled(), true);
+      assert.ok(Number(await resendForm.getAttribute("data-resend-wait-ms")) <= firstWait);
+      const resendCsrf = await resendForm.locator('[name="_csrf"]').inputValue();
+      step = "resend cooldown direct POST guard";
+      const tooEarly = await context.request.post(base + "/activate/resend", { form: { _csrf: resendCsrf, email }, headers: { Origin: base }, maxRedirects: 0 });
+      assert.equal(tooEarly.status(), 429);
+      assert.ok(Number(tooEarly.headers()["retry-after"]) > 0);
+      // Age only test metadata to exercise expiry without waiting a real minute.
+      await db.activationChallenge.update({ where: { userId: user.id }, data: { lastSentAt: new Date(Date.now() - policy.resendDelay - 1000) } });
+      await db.rateLimit.update({ where: { key: `resend:minute:${email}` }, data: { windowStart: new Date(Date.now() - policy.resendDelay + 2500) } });
+      step = "resend cooldown expiry";
+      await page.reload();
+      if (javaScriptEnabled)
+      {
+        await page.waitForFunction(() => !document.querySelector('[data-resend-button]').disabled);
+      }
+      else
+      {
+        await new Promise(resolve => setTimeout(resolve, 2600));
+        await page.reload();
+        assert.equal(await resendButton.isDisabled(), false);
+      }
+      const resentMailBefore = inbox.length;
+      step = "resend cooldown native POST";
+      await submit(page, "/activate/resend", { email });
+      assert.equal(new URL(page.url()).pathname, "/activate");
+      assert.equal(await resendButton.isDisabled(), true);
+      activationMail = await message(email, resentMailBefore, body => body.includes("Mã kích hoạt:"));
+      await noOverflow(page);
+      await photo(page, label + "-resend-cooldown");
       step = "pending login and OTP activation";
       const otp = activationMail.match(/Mã kích hoạt:\s*(\d{6})/)[1];
       await page.goto(base + "/login");
@@ -140,9 +183,21 @@ module.exports = async function run({ db, base, password, policy, security, mess
       const oldSession = await context.request.get(base + "/dishes", { headers: { Cookie: "sid=" + preResetSid }, maxRedirects: 0 }); assert.equal(oldSession.status(), 303);
       await page.goto(base + "/reset?token=" + raw); assert.equal(await page.locator('[data-error-code="INVALID_RESET"]').count(), 1);
       await photo(page, label + "-reset-used");
-      report.checks.push({ name: label, status: "PASS", width, javaScriptEnabled, nativeForms: true, sidRotated: true, smtpOTPReceived: true, smtpResetReceived: true, keyboardTabFocusEnter: true, paginationBothLists: true, history: true, csrf403: true, logoutAndResetRevokeSession: true, cookies: [{ name: "sid", value: "[REDACTED]", httpOnly: authenticatedCookie.httpOnly, sameSite: authenticatedCookie.sameSite, secure: authenticatedCookie.secure, path: authenticatedCookie.path }] });
+      report.checks.push({ name: label, status: "PASS", width, javaScriptEnabled, nativeForms: true, resendCooldown: true, sidRotated: true, smtpOTPReceived: true, smtpResetReceived: true, keyboardTabFocusEnter: true, paginationBothLists: true, history: true, csrf403: true, logoutAndResetRevokeSession: true, cookies: [{ name: "sid", value: "[REDACTED]", httpOnly: authenticatedCookie.httpOnly, sameSite: authenticatedCookie.sameSite, secure: authenticatedCookie.secure, path: authenticatedCookie.path }] });
     } catch (error) {
       // Playwright errors can include input values/URLs. Never print their message.
+      if (step.startsWith("resend cooldown"))
+      {
+        report.resendFailure = await page.locator('[data-resend-form]').evaluate(form => ({
+          renderedWaitMs: Number(form.dataset.resendWaitMs),
+          buttonDisabled: form.querySelector('[data-resend-button]').disabled,
+          countdownSeconds: Number(form.querySelector('[data-resend-countdown]').textContent.replace(/\D/g, "")),
+        })).catch(() => null);
+        report.resendFailureEmailMatches = await page.locator('[data-resend-form] [name="email"]').inputValue().then(value => value === email).catch(() => false);
+        report.resendFailureComputedWait = await require("../src/services/resendCooldown").resendCooldown(db, "", email);
+        const budget = await db.rateLimit.findUnique({ where: { key: `resend:minute:${email}` } });
+        report.resendFailureBudget = budget ? { count: budget.count, windowStart: budget.windowStart, observedAt: new Date() } : null;
+      }
       report.checks.push({ name: label, status: "FAIL", step, kind: error.name, details: "withheld to protect credentials, OTP and tokens" });
       await photo(page, label + "-failure").catch(() => {});
       await fs.writeFile(path.join(evidence, "browser-results.json"), JSON.stringify(report, null, 2));

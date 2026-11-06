@@ -84,7 +84,7 @@ class Client {
     if (token) this.csrf = token;
     results.requests.push({ check: stage, ...(this.requestBase === base ? {} : { instance: "secondary" }), method, url: safeURL(route, base), status: response.status, location: response.headers.get("location") ? safeURL(response.headers.get("location"), base) : null, setCookie: cookies.filter(item => item.startsWith("sid=")).map(cookieFlags) });
     lastObservation = { cookie: this.cookie, route, method };
-    return { status: response.status, location: response.headers.get("location"), html, cookies, referrer: response.headers.get("referrer-policy") };
+    return { status: response.status, location: response.headers.get("location"), html, cookies, referrer: response.headers.get("referrer-policy"), retryAfter: response.headers.get("retry-after") };
   }
   get(route) { return this.request(route); }
   post(route, values, options) { return this.request(route, values, options); }
@@ -629,6 +629,43 @@ async function main() {
     {
       await stopProcess(peer);
     }
+  });
+  await check("resend SSR countdown persists across reload, explains 429 and respects hour and IP budgets", async () =>
+  {
+    await clearLimits();
+    const client = new Client();
+    const email = "cooldown-absent@example.test";
+    const remaining = response => Number(response.html.match(/data-resend-wait-ms="(\d+)"/)[1]);
+    const button = response => response.html.match(/<button[^>]*data-resend-button[^>]*>/)[0];
+    await client.get("/activate");
+    assert.equal((await client.post("/activate/resend", { email })).status, 303);
+    const first = await client.get("/activate");
+    assert.ok(remaining(first) > 0 && remaining(first) <= policy.resendDelay);
+    assert.match(button(first), /disabled/);
+    const key = `resend:minute:${email}`;
+    const before = await db.rateLimit.findUnique({ where: { key } });
+    const reloaded = await client.get("/activate");
+    assert.ok(remaining(reloaded) <= remaining(first));
+    assert.deepEqual(await db.rateLimit.findUnique({ where: { key } }), before);
+    const denied = await client.post("/activate/resend", { email });
+    assert.equal(denied.status, 429);
+    assert.match(denied.html, /RATE_LIMITED/);
+    assert.match(button(denied), /disabled/);
+    assert.ok(Number(denied.retryAfter) > 0);
+    const ipKey = (await db.rateLimit.findFirst({ where: { key: { startsWith: "activate-resend:ip:" } } })).key;
+    await db.rateLimit.update({ where: { key }, data: { windowStart: new Date(Date.now() - policy.resendDelay - 1000) } });
+    assert.doesNotMatch(button(await client.get("/activate")), /disabled/);
+    assert.equal((await client.post("/activate/resend", { email })).status, 303);
+    await clearLimits();
+    await db.rateLimit.create({ data: { key: `resend:hour:${email}`, count: policy.resendLimit, windowStart: new Date() } });
+    const hourly = await client.get("/activate");
+    assert.ok(remaining(hourly) > policy.resendDelay);
+    assert.match(button(hourly), /disabled/);
+    assert.equal((await client.post("/activate/resend", { email })).status, 429);
+    await clearLimits();
+    await db.rateLimit.create({ data: { key: ipKey, count: policy.activationLimit, windowStart: new Date() } });
+    assert.match(button(await client.get("/activate")), /disabled/);
+    assert.equal((await client.post("/activate/resend", { email })).status, 429);
   });
   if (browserEvidence) {
     stage = "native browser auth acceptance";

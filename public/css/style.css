@@ -1397,6 +1397,27 @@ ul { list-style: none; }
 .auth-form { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
 .auth-form input:not([type="hidden"]) { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--stone-light); border-radius: var(--radius-sm); font: inherit; }
 .auth-form button { min-height: 44px; }
+.auth-resend-button:disabled
+{
+  color: var(--stone-light);
+  background: #e7e5e4;
+  border-color: #d6d3d1;
+  opacity: 1;
+  cursor: not-allowed;
+}
+.auth-resend-button:disabled:hover
+{
+  transform: none;
+}
+.auth-resend-button [data-resend-countdown]
+{
+  font-variant-numeric: tabular-nums;
+}
+.auth-resend-status
+{
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
 .auth-links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; }
 .auth-links a,.auth-captcha a { color: var(--burgundy); text-decoration: underline; }
 .auth-error { color: var(--burgundy); padding: 12px; border: 1px solid currentColor; margin: 16px 0; overflow-wrap: anywhere; }

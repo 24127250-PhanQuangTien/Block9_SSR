@@ -1,0 +1,17 @@
+{
+  "startedAt": "2026-11-06T01:51:41.462Z",
+  "database": "real isolated PostgreSQL schema",
+  "securityMocks": false,
+  "checks": [],
+  "requests": [],
+  "writesToApplicationSchema": 0,
+  "browser": {
+    "status": "PASS",
+    "checks": 4,
+    "screenshots": 49,
+    "chrome": "156.0.8078.81"
+  },
+  "status": "PASS",
+  "completedAt": "2026-11-06T01:57:17.970Z",
+  "isolatedSchemaRemoved": true
+}

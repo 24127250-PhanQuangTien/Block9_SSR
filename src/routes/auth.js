@@ -8,6 +8,7 @@ const { atomic } = require("../services/atomic");
 const mail = require("../services/mail");
 const { csrf } = require("../middleware/csrf");
 const { requireLogin, cookieOptions } = require("../middleware/requireLogin");
+const { resendCooldown } = require("../services/resendCooldown");
 
 module.exports = function authRouter(db, config) {
   const router = express.Router();
@@ -21,13 +22,19 @@ module.exports = function authRouter(db, config) {
   const dummyHash = crypto.hashPassword(crypto.random());
   const dummy = () => dummyHash;
 
-  async function renderForm(req, res, view, { email = "", error = null, code = null, showCaptcha = false, message = null } = {}) {
+  async function renderForm(req, res, view, { email = "", error = null, code = null, showCaptcha = false, message = null, status = 200 } = {})
+  {
     let challenge = null;
     if (showCaptcha) {
       if (!await rate.consume(db, ipKey(req, "captcha"), policy.captchaIssueLimit, policy.captchaIssueWindow)) return limited(res);
       challenge = await captcha.issue(db, req.session.anonId, view === "register" ? "register" : "login");
     }
-    return res.status(200).render(`auth/${view}`, { title: ({ register: "Đăng Ký", login: "Đăng Nhập", activate: "Kích Hoạt Tài Khoản", forgot: "Quên Mật Khẩu" })[view], email, error, code, challenge, message });
+    const resendWaitMs = view === "activate" ? await resendCooldown(db, req.ip, email) : 0;
+    if (view === "activate" && status === 429)
+    {
+      res.set("Retry-After", String(Math.max(1, Math.ceil(resendWaitMs / 1000))));
+    }
+    return res.status(status).render(`auth/${view}`, { title: ({ register: "Đăng Ký", login: "Đăng Nhập", activate: "Kích Hoạt Tài Khoản", forgot: "Quên Mật Khẩu" })[view], email, error, code, challenge, message, resendWaitMs });
   }
 
   router.get("/register", wrap((req, res) => renderForm(req, res, "register", { showCaptcha: true })));
@@ -57,6 +64,7 @@ module.exports = function authRouter(db, config) {
     if (issued) mail.send(issued.email, "Mã kích hoạt tài khoản", `Mã kích hoạt: ${issued.code}\nMã có hiệu lực trong 10 phút.`);
     req.session.activationEmail = email;
     await genericDelay(start);
+    await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
     res.redirect(303, "/activate");
   });
 
@@ -72,8 +80,12 @@ module.exports = function authRouter(db, config) {
   });
   post("/activate/resend", async (req, res) => {
     const start = Date.now(), email = emailOf(req);
+    req.session.activationEmail = email;
     // Apply cooldown/hour budget to every submitted email, even nonexistent/active.
-    if (!await rate.consume(db, ipKey(req, "activate-resend"), policy.activationLimit, policy.loginWindow) || !await rate.consume(db, `resend:minute:${email}`, 1, policy.resendDelay) || !await rate.consume(db, `resend:hour:${email}`, policy.resendLimit, policy.resendWindow)) return limited(res);
+    if (!await rate.consume(db, ipKey(req, "activate-resend"), policy.activationLimit, policy.loginWindow) || !await rate.consume(db, `resend:minute:${email}`, 1, policy.resendDelay) || !await rate.consume(db, `resend:hour:${email}`, policy.resendLimit, policy.resendWindow))
+    {
+      return renderForm(req, res, "activate", { email, status: 429, code: "RATE_LIMITED", error: "Bạn cần chờ trước khi gửi lại mã. Nút gửi lại sẽ mở khi hết thời gian hiển thị." });
+    }
     const sent = await atomic(db, async tx => {
       const user = await tx.user.findUnique({ where: { email } });
       if (!user || user.status !== "pending") return null;
@@ -83,8 +95,8 @@ module.exports = function authRouter(db, config) {
     // An account's extra safety backstop must not reveal its existence/status.
     // Suppress delivery, keeping the same 303 when public quotas allow it.
     if (sent?.otp) mail.send(email, "Mã kích hoạt tài khoản", `Mã kích hoạt: ${sent.otp}\nMã có hiệu lực trong 10 phút.`);
-    req.session.activationEmail = email;
     await genericDelay(start);
+    await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
     res.redirect(303, "/activate");
   });
 
