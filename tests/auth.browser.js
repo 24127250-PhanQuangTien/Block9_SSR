@@ -14,6 +14,7 @@ module.exports = async function run({ db, base, password, policy, security, mess
       const field = form.locator(`[name="${name}"]`);
       if (await field.getAttribute("type") === "hidden")
       {
+        if (name === "otp") await form.locator("[data-otp-digit]").first().fill(value);
         assert.equal(await field.inputValue(), value);
       }
       else

@@ -1401,6 +1401,30 @@ ul { list-style: none; }
 .auth-form { display: flex; flex-direction: column; gap: 10px; margin: 20px 0; }
 .auth-form input:not([type="hidden"]) { width: 100%; min-height: 44px; padding: 10px; border: 1px solid var(--stone-light); border-radius: var(--radius-sm); font: inherit; }
 .auth-form button { min-height: 44px; }
+.auth-otp
+{
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  width: 100%;
+  max-width: 304px;
+  margin-inline: auto;
+}
+.auth-form .auth-otp input
+{
+  min-width: 0;
+  height: 52px;
+  padding: 8px 0;
+  text-align: center;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.auth-form input[data-otp-input]:not([type="hidden"])
+{
+  max-width: 14ch;
+  letter-spacing: 0.25em;
+  font-variant-numeric: tabular-nums;
+}
 .auth-resend-button:disabled
 {
   color: var(--stone-light);

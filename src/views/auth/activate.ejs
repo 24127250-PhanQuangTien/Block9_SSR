@@ -4,7 +4,16 @@
 <form action="/activate" method="POST" class="auth-form">
   <input type="hidden" name="_csrf" value="<%= csrfToken %>">
   <input type="hidden" name="email" value="<%= email %>">
-  <label for="otp">Mã kích hoạt 6 chữ số</label><input id="otp" name="otp" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+  <label id="otp-label" for="otp">Mã kích hoạt 6 chữ số</label>
+  <input id="otp" name="otp" data-otp-input inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+  <template data-otp-template>
+    <div class="auth-otp" role="group" aria-labelledby="otp-label" dir="ltr">
+      <% for (let digit = 1; digit <= 6; digit++)
+      { %>
+      <input id="otp-digit-<%= digit %>" data-otp-digit type="text" inputmode="numeric" autocomplete="<%= digit === 1 ? 'one-time-code' : 'off' %>" pattern="[0-9]" maxlength="6" aria-label="Chữ số <%= digit %> trên 6" required>
+      <% } %>
+    </div>
+  </template>
   <button type="submit" class="btn btn--primary">Kích Hoạt</button>
 </form>
 <form action="/activate/resend" method="POST" class="auth-form" data-resend-form data-resend-wait-ms="<%= resendWaitMs %>">
