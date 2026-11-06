@@ -58,6 +58,12 @@ Các điểm quan trọng:
 - Người dùng không thể tự gửi `role=admin` để được quyền admin; tài khoản đăng ký được gán `viewer`.
 - Kích hoạt xong **không tự động đăng nhập**; người dùng phải đăng nhập bình thường.
 
+**Dẫn chứng Argon2id trong mã nguồn:**
+
+- **Chọn thuật toán:** [`src/services/crypto.js`, dòng 10](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L10) định nghĩa `hashPassword`, gọi `argon2.hash(...)` với `type: argon2.argon2id`. Đây là chỗ chỉ rõ dự án sử dụng **Argon2id** để băm mật khẩu.
+- **Băm và lưu mật khẩu:** [`src/routes/auth.js`, dòng 52–58](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L52-L58) gọi hàm trên khi đăng ký và lưu kết quả vào `passwordHash`. Khi đặt lại mật khẩu, [dòng 181–188](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L181-L188) cũng dùng cùng hàm băm này.
+- **Kiểm tra khi đăng nhập:** [`src/routes/auth.js`, dòng 119](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/routes/auth.js#L119) gọi `verifyPassword`; hàm này dùng `argon2.verify(...)` tại [`src/services/crypto.js`, dòng 11](https://github.com/ChuHaiLi/Web-Block8/blob/main/src/services/crypto.js#L11) để kiểm tra mật khẩu nhập vào với hash đã lưu.
+
 **Trạng thái:** Đã có kiểm thử đạt. Luồng nhận OTP qua email thật cũng đã được người dùng xác nhận.
 
 ### 2.2. CAPTCHA chống đăng ký tự động
