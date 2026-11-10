@@ -29,6 +29,7 @@ const testPort = process.env.AUTH_TEST_PORT || "3108";
 if (!/^[1-9][0-9]{3,4}$/.test(testPort) || Number(testPort) > 65535) throw new Error("INVALID_TEST_PORT");
 const testEnv = { ...process.env, DATABASE_URL: database.toString(), PORT: testPort, APP_BASE_URL: `http://localhost:${testPort}`, APP_ORIGIN: `http://localhost:${testPort}`, TRUST_PROXY: "false", NODE_ENV: "test", SESSION_SECRET: security.random(48), OTP_PEPPER: security.random(48), SMTP_HOST: "127.0.0.1", SMTP_USER: "", SMTP_PASS: "", SMTP_FROM: "Auth Test <no-reply@example.test>" };
 const db = new PrismaClient({ datasourceUrl: database.toString() });
+testEnv.MFA_ENCRYPTION_KEY = Buffer.from(security.random(32), "base64url").toString("base64");
 const base = testEnv.APP_BASE_URL;
 const browserOnly = process.argv.includes("--browser-only");
 const evidence = path.resolve(process.env.AUTH_EVIDENCE_DIR || (browserOnly ? "docs/evidence/auth-browser-final" : "docs/evidence/auth-final"));

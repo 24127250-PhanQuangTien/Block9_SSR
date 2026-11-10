@@ -63,7 +63,7 @@
         </div>
 
         <!-- Chọn Đầu Bếp Phụ Trách -->
-        <div class="form-group">
+        <% if (currentUser.role === 'admin') { %><div class="form-group">
           <label for="chefId" class="form-label required">Đầu Bếp Phụ Trách (Chef):</label>
           <select id="chefId" name="chefId" class="form-control" required>
             <option value="">-- Chọn đầu bếp phụ trách món ăn --</option>
@@ -76,7 +76,7 @@
             <% } %>
           </select>
           <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Mỗi món ăn bắt buộc phải có một đầu bếp đảm nhiệm chế biến.</small>
-        </div>
+        </div><% } %>
 
         <!-- Chọn Danh Sách Nguyên Liệu -->
         <div class="form-group">

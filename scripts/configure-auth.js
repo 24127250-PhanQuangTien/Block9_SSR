@@ -6,6 +6,7 @@ const additions = [];
 function missing(key, value) { if (!process.env[key]) additions.push(`${key}=${JSON.stringify(value)}`); }
 missing("SESSION_SECRET", crypto.randomBytes(48).toString("base64url"));
 missing("OTP_PEPPER", crypto.randomBytes(48).toString("base64url"));
+missing("MFA_ENCRYPTION_KEY", crypto.randomBytes(32).toString("base64"));
 missing("NODE_ENV", "development");
 missing("APP_BASE_URL", "http://localhost:3000");
 missing("APP_ORIGIN", "http://localhost:3000");

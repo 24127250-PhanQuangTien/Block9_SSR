@@ -46,7 +46,7 @@ function makePagination({ page, pageSize, skip }, total, basePath, filters) {
   const url = (number) => {
     const query = new URLSearchParams();
     // Deliberate allowlist; never copy req.query into links or redirects.
-    for (const key of ["q", "category", "status", "sort"]) {
+    for (const key of ["q", "category", "status", "availability", "sort"]) {
       if (typeof filters[key] === "string" && filters[key]) query.set(key, filters[key]);
     }
     query.set("pageSize", String(pageSize));

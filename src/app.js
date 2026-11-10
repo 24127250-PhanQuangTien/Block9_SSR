@@ -7,6 +7,7 @@ const { configuration, policy } = require("./config/authPolicy");
 const { PrismaSessionStore } = require("./services/sessionStore");
 const { prepare, csrf } = require("./middleware/csrf");
 const { requireLogin, optionalUser, cookieOptions } = require("./middleware/requireLogin");
+const { can } = require("./config/authorization");
 
 const dishesRouter = require("./routes/dishes");
 const adminDishesRouter = require("./routes/adminDishes");
@@ -19,6 +20,7 @@ app.disable("x-powered-by");
 app.set("trust proxy", config.trustProxy);
 app.locals.currentUser = null;
 app.locals.csrfToken = "";
+app.locals.can = can;
 
 // 1. Cấu hình EJS View Engine
 app.set("view engine", "ejs");

@@ -11,12 +11,13 @@ router.get("/", paginationRequest, async (req, res, next) => {
 
     const where = q
       ? {
+          status: "published",
           name: {
             contains: q,
             mode: "insensitive", // Tìm kiếm không phân biệt chữ hoa / thường
           },
         }
-      : {};
+      : { status: "published" };
     const total = await prisma.dish.count({ where });
     const pagination = makePagination(res.locals.pageRequest, total, "/dishes", { q });
     if (pagination.redirect) return res.redirect(303, pagination.redirect);
@@ -56,8 +57,8 @@ router.get("/:id", async (req, res, next) => {
       });
     }
 
-    const dish = await prisma.dish.findUnique({
-      where: { id },
+    const dish = await prisma.dish.findFirst({
+      where: { id, status: "published" },
       include: {
         chef: true,
         ingredients: true,

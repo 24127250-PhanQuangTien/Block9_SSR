@@ -74,7 +74,7 @@ function validateDish(body, chefs, ingredients) {
       name: form.name.trim(), description: form.description.trim() || null,
       price, category: form.category.trim() || null, available: form.available,
       imageUrl: form.imageUrl.trim() || null,
-      chef: { connect: { id: chefId } },
+      chefId,
     },
     ingredientIds,
   };

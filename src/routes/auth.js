@@ -9,6 +9,7 @@ const mail = require("../services/mail");
 const { csrf } = require("../middleware/csrf");
 const { requireLogin, cookieOptions } = require("../middleware/requireLogin");
 const { resendCooldown } = require("../services/resendCooldown");
+const mfa = require("../services/mfa");
 
 module.exports = function authRouter(db, config) {
   const router = express.Router();
@@ -21,6 +22,21 @@ module.exports = function authRouter(db, config) {
   // Every missing-user login pays one real Argon2id verification too.
   const dummyHash = crypto.hashPassword(crypto.random());
   const dummy = () => dummyHash;
+  const saveSession = req => new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
+  const activeUser = userId => db.user.findUnique({ where: { id: userId } });
+  const establishSession = async (req, user) => {
+    await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
+    Object.assign(req.session, { userId: user.id, createdAt: Date.now(), lastSeenAt: Date.now(), authVersion: +user.updatedAt, freshAuthentication: true, csrf: crypto.random(), anonId: crypto.random(24) });
+    await saveSession(req);
+    delete req.session.freshAuthentication;
+  };
+  const pendingUser = async req => {
+    const pending = req.session.mfaPending;
+    if (!pending || !pending.userId || !Number.isFinite(pending.expiresAt) || pending.expiresAt <= Date.now()) return null;
+    const user = await activeUser(pending.userId);
+    return user && user.status === "active" && user.mfaEnabled ? user : null;
+  };
+  const renderMfa = (req, res, options = {}) => res.status(options.status || 200).render("auth/mfa", { title: "Xác Minh MFA", error: null, ...options });
 
   async function renderForm(req, res, view, { email = "", error = null, code = null, showCaptcha = false, message = null, status = 200 } = {})
   {
@@ -130,19 +146,136 @@ module.exports = function authRouter(db, config) {
       await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
       return renderForm(req, res, "login", { email, error: "Tài khoản cần kích hoạt trước khi đăng nhập.", code: "ACTIVATION_REQUIRED", showCaptcha: failures.count >= policy.loginCaptchaAfter });
     }
-    await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
-    Object.assign(req.session, { userId: user.id, createdAt: Date.now(), lastSeenAt: Date.now(), authVersion: +user.updatedAt, freshAuthentication: true, csrf: crypto.random(), anonId: crypto.random(24) });
+    if (user.mfaEnabled) {
+      await new Promise((resolve, reject) => req.session.regenerate(error => error ? reject(error) : resolve()));
+      Object.assign(req.session, { mfaPending: { userId: user.id, createdAt: Date.now(), expiresAt: Date.now() + policy.mfaPendingTTL }, csrf: crypto.random(), anonId: crypto.random(24) });
+      await saveSession(req);
+      await db.rateLimit.deleteMany({ where: { key } });
+      return res.redirect(303, "/mfa");
+    }
+    await establishSession(req, user);
     await db.rateLimit.deleteMany({ where: { key } });
-    await new Promise((resolve, reject) => req.session.save(error => error ? reject(error) : resolve()));
-    delete req.session.freshAuthentication;
     res.redirect(303, "/dishes");
   });
+
+  router.get("/mfa", wrap(async (req, res) => {
+    if (!await pendingUser(req)) {
+      if (req.session.mfaPending) await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve()));
+      return res.redirect(303, "/login");
+    }
+    return renderMfa(req, res);
+  }));
+
+  post("/mfa", async (req, res) => {
+    const pending = await pendingUser(req);
+    if (!pending) return res.redirect(303, "/login");
+    const key = "mfa:user:" + pending.id;
+    const current = await rate.read(db, key, policy.mfaWindow);
+    if (current.locked) return renderMfa(req, res, { status: 429, error: "Bạn đã thử quá nhiều lần. Vui lòng chờ rồi thử lại." });
+    const result = await atomic(db, async tx => {
+      const user = await tx.user.findUnique({ where: { id: pending.id } });
+      if (!user || user.status !== "active" || !user.mfaEnabled) return null;
+      const factor = await mfa.consumeFactor(tx, user, req.body.code, config.mfaEncryptionKey);
+      return factor ? tx.user.findUnique({ where: { id: user.id } }) : null;
+    });
+    if (!result) {
+      await rate.consume(db, key, policy.mfaAttempts, policy.mfaWindow, policy.mfaLock);
+      const after = await rate.read(db, key, policy.mfaWindow);
+      return renderMfa(req, res, { status: after.locked ? 429 : 200, error: after.locked ? "Bạn đã thử quá nhiều lần. Vui lòng chờ rồi thử lại." : "Mã xác minh không hợp lệ." });
+    }
+    await db.rateLimit.deleteMany({ where: { key } });
+    await establishSession(req, result);
+    res.redirect(303, "/dishes");
+  });
+
+  const beginSetup = async userId => {
+    const secret = mfa.authenticator.generateSecret();
+    const encrypted = crypto.encryptSecret(secret, config.mfaEncryptionKey);
+    return db.user.update({ where: { id: userId }, data: { mfaSecret: encrypted, mfaEnabled: false, mfaLastStep: null } });
+  };
+  const securityUser = req => activeUser(req.session.userId);
+  const renderSetup = async (req, res, error = null) => {
+    const user = await securityUser(req);
+    if (!user || user.mfaEnabled || !user.mfaSecret) return res.redirect(303, "/account/security");
+    const secret = mfa.secret(user, config.mfaEncryptionKey);
+    const otpauth = mfa.authenticator.keyuri(user.email, "Restaurant App", secret);
+    const qr = await require("qrcode").toString(otpauth, { type: "svg", margin: 1 });
+    res.set("Cache-Control", "no-store");
+    return res.render("auth/mfaSetup", { title: "Thiết Lập MFA", qr, secret, error });
+  };
+  const reauthenticate = async (req, password, factor, action) => {
+    const user = await securityUser(req);
+    if (!user || user.status !== "active" || !user.mfaEnabled || !await crypto.verifyPassword(user.passwordHash, password)) return null;
+    return atomic(db, async tx => {
+      const fresh = await tx.user.findUnique({ where: { id: user.id } });
+      if (!fresh || !await mfa.consumeFactor(tx, fresh, factor, config.mfaEncryptionKey)) return null;
+      return action(tx, fresh);
+    });
+  };
+
+  router.get("/account/security", requireLogin(db, config), wrap(async (req, res) => {
+    const user = await securityUser(req);
+    res.status(200).render("auth/security", { title: "Bảo Mật Tài Khoản", mfaEnabled: !!user?.mfaEnabled, error: null });
+  }));
+  post("/account/security/setup", async (req, res) => {
+    const user = await securityUser(req);
+    if (!user || user.mfaEnabled) return res.redirect(303, "/account/security");
+    const updated = await beginSetup(user.id);
+    req.session.authVersion = +updated.updatedAt;
+    await saveSession(req);
+    res.redirect(303, "/account/security/setup");
+  }, true);
+  router.get("/account/security/setup", requireLogin(db, config), wrap(async (req, res) => {
+    return renderSetup(req, res);
+  }));
+  post("/account/security/setup/confirm", async (req, res) => {
+    const user = await securityUser(req);
+    if (!user || user.mfaEnabled || !user.mfaSecret) return res.redirect(303, "/account/security");
+    const step = mfa.totpStep(user, req.body.code, config.mfaEncryptionKey);
+    if (step === null) return renderSetup(req, res, "Mã xác minh không hợp lệ. Hãy nhập mã 6 số hiện tại từ ứng dụng xác thực.");
+    const codes = await atomic(db, async tx => {
+      const claimed = await tx.user.updateMany({ where: { id: user.id, mfaEnabled: false, mfaSecret: user.mfaSecret, OR: [{ mfaLastStep: null }, { mfaLastStep: { lt: step } }] }, data: { mfaEnabled: true, mfaLastStep: step } });
+      if (claimed.count !== 1) return null;
+      return mfa.replaceRecoveryCodes(tx, user.id);
+    });
+    if (!codes) return renderSetup(req, res, "Thiết lập MFA không thể hoàn tất. Hãy tải lại trang và thử mã mới.");
+    const updated = await activeUser(user.id);
+    req.session.authVersion = +updated.updatedAt;
+    await saveSession(req);
+    res.set("Cache-Control", "no-store");
+    res.render("auth/mfaRecovery", { title: "Mã khôi phục MFA", codes });
+  }, true);
+  const securityAction = action => async (req, res) => {
+    const result = await reauthenticate(req, req.body.password, req.body.code, action);
+    if (!result) return res.status(403).render("auth/security", { title: "Bảo Mật Tài Khoản", mfaEnabled: true, error: "Mật khẩu hoặc mã MFA không hợp lệ." });
+    if (result.codes) {
+      res.set("Cache-Control", "no-store");
+      return res.render("auth/mfaRecovery", { title: "Mã khôi phục MFA", codes: result.codes });
+    }
+    if (result.resetup) {
+      const updated = await beginSetup(result.userId);
+      req.session.authVersion = +updated.updatedAt;
+      await saveSession(req);
+      return res.redirect(303, "/account/security/setup");
+    }
+    const updated = await activeUser(req.session.userId);
+    req.session.authVersion = +updated.updatedAt;
+    await saveSession(req);
+    res.redirect(303, "/account/security");
+  };
+  post("/account/security/recovery/regenerate", securityAction(async (tx, user) => ({ codes: await mfa.replaceRecoveryCodes(tx, user.id) })), true);
+  post("/account/security/disable", securityAction(async (tx, user) => {
+    await tx.recoveryCode.deleteMany({ where: { userId: user.id } });
+    await tx.user.update({ where: { id: user.id }, data: { mfaEnabled: false, mfaSecret: null, mfaLastStep: null } });
+    return {};
+  }), true);
+  post("/account/security/resetup", securityAction(async (tx, user) => ({ resetup: true, userId: user.id })), true);
 
   post("/logout", async (req, res) => {
     await new Promise((resolve, reject) => req.session.destroy(error => error ? reject(error) : resolve()));
     res.clearCookie("sid", cookieOptions(config));
     res.redirect(303, "/login");
-  }, true);
+  });
 
   router.get("/forgot", wrap((req, res) => renderForm(req, res, "forgot")));
   post("/forgot", async (req, res) => {

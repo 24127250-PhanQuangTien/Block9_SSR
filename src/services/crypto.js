@@ -16,4 +16,17 @@ function equal(left, right) {
 }
 const otpCode = () => String(crypto.randomInt(0, 1000000)).padStart(6, "0");
 const otpHash = (pepper, userId, otp) => crypto.createHmac("sha256", pepper).update(`${userId}:${otp}`).digest("hex");
-module.exports = { random, tokenHash, normalizeEmail, validEmail, validPassword, hashPassword, verifyPassword, equal, otpCode, otpHash };
+function encryptSecret(value, key) {
+  const iv = crypto.randomBytes(12), cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const ciphertext = Buffer.concat([cipher.update(value, "utf8"), cipher.final()]);
+  return [iv, cipher.getAuthTag(), ciphertext].map(part => part.toString("base64url")).join(".");
+}
+function decryptSecret(value, key) {
+  const parts = typeof value === "string" ? value.split(".") : [];
+  if (parts.length !== 3) throw new Error("Invalid encrypted MFA secret");
+  const decipher = crypto.createDecipheriv("aes-256-gcm", key, Buffer.from(parts[0], "base64url"));
+  decipher.setAuthTag(Buffer.from(parts[1], "base64url"));
+  return Buffer.concat([decipher.update(Buffer.from(parts[2], "base64url")), decipher.final()]).toString("utf8");
+}
+const recoveryHash = code => crypto.createHash("sha256").update(code).digest("hex");
+module.exports = { random, tokenHash, normalizeEmail, validEmail, validPassword, hashPassword, verifyPassword, equal, otpCode, otpHash, encryptSecret, decryptSecret, recoveryHash };

@@ -4,6 +4,9 @@ const prisma = require("../prisma");
 
 const { parseValidId, validateIngredient } = require("../validation");
 const { notFound, isPrismaError, serializable } = require("../routeHelpers");
+const { requirePermission } = require("../config/authorization");
+
+router.use(requirePermission("ingredient:read"));
 
 // 1. GET /admin/ingredients - Danh sách quản trị nguyên liệu
 // 1. GET /admin/ingredients - Danh sách quản trị nguyên liệu (có tìm kiếm q)
@@ -42,7 +45,7 @@ router.get("/", async (req, res, next) => {
 });
 
 // 2. GET /admin/ingredients/new - Mở form thêm nguyên liệu mới
-router.get("/new", (req, res) => {
+router.get("/new", requirePermission("ingredient:create"), (req, res) => {
   res.status(200).render("admin/ingredients/new", {
     title: "Thêm Nguyên Liệu Mới",
     ingredient: {},
@@ -72,10 +75,10 @@ function saveIngredient(edit) {
     }
   };
 }
-router.post("/", saveIngredient(false));
+router.post("/", requirePermission("ingredient:create"), saveIngredient(false));
 
 // 4. GET /admin/ingredients/:id/edit - Mở form sửa nguyên liệu
-router.get("/:id/edit", async (req, res, next) => {
+router.get("/:id/edit", requirePermission("ingredient:update"), async (req, res, next) => {
   try {
     const id = parseValidId(req.params.id);
     if (!id) {
@@ -104,10 +107,10 @@ router.get("/:id/edit", async (req, res, next) => {
 });
 
 // 5. PATCH /admin/ingredients/:id - Cập nhật nguyên liệu qua Method Override
-router.patch("/:id", saveIngredient(true));
+router.patch("/:id", requirePermission("ingredient:update"), saveIngredient(true));
 
 // 6. GET /admin/ingredients/:id/delete - Trang xác nhận xóa nguyên liệu
-router.get("/:id/delete", async (req, res, next) => {
+router.get("/:id/delete", requirePermission("ingredient:delete"), async (req, res, next) => {
   try {
     const id = parseValidId(req.params.id);
     if (!id) {
@@ -145,7 +148,7 @@ router.get("/:id/delete", async (req, res, next) => {
 });
 
 // 7. DELETE /admin/ingredients/:id - Xóa nguyên liệu qua Method Override
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", requirePermission("ingredient:delete"), async (req, res, next) => {
   const id = parseValidId(req.params.id);
   if (id === null) return notFound(res);
   try {

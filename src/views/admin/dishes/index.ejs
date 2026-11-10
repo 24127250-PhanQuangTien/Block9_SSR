@@ -9,7 +9,9 @@
         <p class="admin-header__subtitle">Danh sách toàn bộ các món ăn trong cơ sở dữ liệu Supabase.</p>
       </div>
       <div>
+        <% if (can(currentUser, 'dish:create')) { %>
         <a href="/admin/dishes/new" class="btn btn--primary">+ Thêm Món Ăn Mới</a>
+        <% } %>
       </div>
     </div>
 
@@ -50,8 +52,8 @@
           <label class="admin-filter-label" for="filter-status">Trạng thái bếp</label>
           <select id="filter-status" name="status" class="admin-filter-select">
             <option value="">-- Tất cả trạng thái --</option>
-            <option value="available" <%= typeof filters !== 'undefined' && filters.status === 'available' ? 'selected' : '' %>>Đang phục vụ</option>
-            <option value="unavailable" <%= typeof filters !== 'undefined' && filters.status === 'unavailable' ? 'selected' : '' %>>Tạm hết món</option>
+            <option value="draft" <%= typeof filters !== 'undefined' && filters.status === 'draft' ? 'selected' : '' %>>Nháp</option>
+            <option value="published" <%= typeof filters !== 'undefined' && filters.status === 'published' ? 'selected' : '' %>>Đã xuất bản</option>
           </select>
         </div>
 
@@ -153,14 +155,14 @@
                   </td>
                   <td><strong style="color: var(--burgundy); font-family: 'Cormorant Garamond', serif; font-size: 1.25rem;"><%= dish.price.toLocaleString('vi-VN') %> đ</strong></td>
                   <td>
-                    <span class="menu-item__tag <%= dish.available ? 'menu-item__tag--available' : 'menu-item__tag--unavailable' %>">
-                      <%= dish.available ? 'Đang phục vụ' : 'Tạm hết' %>
+                    <span class="menu-item__tag <%= dish.status === 'published' ? 'menu-item__tag--available' : 'menu-item__tag--unavailable' %>">
+                      <%= dish.status === 'published' ? 'Đã xuất bản' : 'Nháp' %>
                     </span>
                   </td>
                   <td class="action-cell">
                     <a href="/admin/dishes/<%= dish.id %>" class="btn-xs btn-xs-view">Xem</a>
-                    <a href="/admin/dishes/<%= dish.id %>/edit" class="btn-xs btn-xs-edit">Sửa</a>
-                    <a href="/admin/dishes/<%= dish.id %>/delete" class="btn-xs btn-xs-delete">Xóa</a>
+                    <% if (can(currentUser, 'dish:update', dish)) { %><a href="/admin/dishes/<%= dish.id %>/edit" class="btn-xs btn-xs-edit">Sửa</a><% } %>
+                    <% if (can(currentUser, 'dish:delete')) { %><a href="/admin/dishes/<%= dish.id %>/delete" class="btn-xs btn-xs-delete">Xóa</a><% } %>
                   </td>
                 </tr>
               <% }); %>

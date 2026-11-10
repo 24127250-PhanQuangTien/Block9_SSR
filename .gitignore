@@ -1,4 +1,9 @@
 node_modules/
 .env
+.env.*
+!.env.example
+block9-bai2-prompt.md
+block9-bai2-fix-prompt.md
+backups/
 .DS_Store
 *.log

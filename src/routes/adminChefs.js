@@ -4,6 +4,9 @@ const prisma = require("../prisma");
 
 const { parseValidId, validateChef } = require("../validation");
 const { notFound, isPrismaError } = require("../routeHelpers");
+const { requirePermission } = require("../config/authorization");
+
+router.use(requirePermission("chef:read"));
 
 // 1. GET /admin/chefs - Danh sách quản trị đầu bếp
 // 1. GET /admin/chefs - Danh sách quản trị đầu bếp (có tìm kiếm q)
@@ -36,7 +39,7 @@ router.get("/", async (req, res, next) => {
 });
 
 // 2. GET /admin/chefs/new - Mở form thêm đầu bếp mới
-router.get("/new", (req, res) => {
+router.get("/new", requirePermission("chef:create"), (req, res) => {
   res.status(200).render("admin/chefs/new", {
     title: "Thêm Đầu Bếp Mới",
     chef: {},
@@ -66,10 +69,10 @@ function saveChef(edit) {
     }
   };
 }
-router.post("/", saveChef(false));
+router.post("/", requirePermission("chef:create"), saveChef(false));
 
 // 4. GET /admin/chefs/:id/edit - Mở form sửa đầu bếp
-router.get("/:id/edit", async (req, res, next) => {
+router.get("/:id/edit", requirePermission("chef:update"), async (req, res, next) => {
   try {
     const id = parseValidId(req.params.id);
     if (!id) {
@@ -98,10 +101,10 @@ router.get("/:id/edit", async (req, res, next) => {
 });
 
 // 5. PATCH /admin/chefs/:id - Cập nhật đầu bếp qua Method Override
-router.patch("/:id", saveChef(true));
+router.patch("/:id", requirePermission("chef:update"), saveChef(true));
 
 // 6. GET /admin/chefs/:id/delete - Trang xác nhận xóa đầu bếp
-router.get("/:id/delete", async (req, res, next) => {
+router.get("/:id/delete", requirePermission("chef:delete"), async (req, res, next) => {
   try {
     const id = parseValidId(req.params.id);
     if (!id) {
@@ -129,7 +132,7 @@ router.get("/:id/delete", async (req, res, next) => {
 });
 
 // 7. DELETE /admin/chefs/:id - Xóa đầu bếp qua Method Override
-router.delete("/:id", async (req, res, next) => {
+router.delete("/:id", requirePermission("chef:delete"), async (req, res, next) => {
   try {
     const id = parseValidId(req.params.id);
     if (!id) {

@@ -1509,9 +1509,9 @@ a.pagination__item:hover {
   color: var(--text-dark);
   font: inherit;
 }
-.search-form--paginated { flex-wrap: wrap; align-items: center; }
+.search-form--paginated { flex-wrap: wrap; align-items: flex-end; }
 .search-form--paginated .search-input-group { min-width: 200px; }
-.search-form--paginated .page-size-field { flex: 0 0 auto; }
+.search-form--paginated .page-size-field { flex: 0 0 auto; justify-content: flex-end; }
 .admin-filter-form--paginated { flex-wrap: wrap; }
 .search-form--paginated :is(input,select,button),
 .admin-filter-form--paginated :is(input,select,button),
@@ -1520,9 +1520,11 @@ a.pagination__item:hover {
   html { scroll-behavior: auto; }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 640px) {
   .search-form--paginated .search-input-group { min-width: 0; width: 100%; }
-  .search-form--paginated .page-size-field { width: 100%; }
+  .search-form--paginated { flex-direction: column; align-items: stretch; }
+  .search-form--paginated .page-size-field,
+  .search-form--paginated > .btn { width: 100%; }
 }
 
 /* --- Search Section (Customer Menu) --- */
@@ -1534,6 +1536,13 @@ a.pagination__item:hover {
 .search-form {
   display: flex;
   gap: 12px;
+}
+
+.search-form--paginated .search-input,
+.search-form--paginated .page-size-field select,
+.search-form--paginated > .btn {
+  height: 52px;
+  box-sizing: border-box;
 }
 
 .search-input-group {

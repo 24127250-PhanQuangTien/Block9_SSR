@@ -17,6 +17,7 @@ model Dish {
   imageUrl    String?
   chefId      Int?
   chef        Chef?        @relation(fields: [chefId], references: [id], onDelete: SetNull)
+  status      String       @default("published")
   ingredients Ingredient[]
   createdAt   DateTime     @default(now())
 
@@ -28,6 +29,7 @@ model Chef {
   name      String
   specialty String
   dishes    Dish[]
+  users     User[]
   createdAt DateTime @default(now())
 
   @@map("chefs")
@@ -45,18 +47,38 @@ model Ingredient {
 }
 
 model User {
-  id                  String                @id @default(uuid()) @db.Uuid
+  id                  String               @id @default(uuid()) @db.Uuid
   emailRaw            String
-  email               String                @unique
+  email               String               @unique
   passwordHash        String
-  role                String                @default("viewer")
-  status              String                @default("pending")
+  role                String               @default("viewer")
+  chefId              Int?
+  chef                Chef?                @relation(fields: [chefId], references: [id], onDelete: SetNull)
+  mfaEnabled          Boolean              @default(false)
+  mfaSecret           String?
+  mfaLastStep         Int?
+  status              String               @default("pending")
   emailVerifiedAt     DateTime?
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @default(now()) @updatedAt
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @default(now()) @updatedAt
   activationChallenge ActivationChallenge?
   passwordResets      PasswordReset[]
   sessions            Session[]
+  recoveryCodes       RecoveryCode[]
+
+  @@index([chefId])
+}
+
+model RecoveryCode {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([userId, usedAt])
 }
 
 model ActivationChallenge {

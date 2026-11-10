@@ -34,6 +34,8 @@
     "express-session": "^1.19.0",
     "method-override": "^3.0.0",
     "nodemailer": "^10.3.1",
+    "otplib": "12.0.1",
+    "qrcode": "1.5.4",
     "svg-captcha": "^1.4.0",
     "validator": "^13.15.35"
   },

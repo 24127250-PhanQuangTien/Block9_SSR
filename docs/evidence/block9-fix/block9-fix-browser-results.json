@@ -1,0 +1,385 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "A-public-menu-search-layout",
+      "status": "PASS",
+      "geometry": {
+        "1024": {
+          "input": {
+            "top": 727.328125,
+            "bottom": 779.328125,
+            "height": 52
+          },
+          "select": {
+            "top": 727.328125,
+            "bottom": 779.328125,
+            "height": 52
+          },
+          "button": {
+            "top": 727.328125,
+            "bottom": 779.328125,
+            "height": 52
+          },
+          "label": {
+            "top": 699.53125,
+            "bottom": 723.328125,
+            "height": 23.796875
+          }
+        },
+        "1366": {
+          "input": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "select": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "button": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "label": {
+            "top": 723.34375,
+            "bottom": 747.140625,
+            "height": 23.796875
+          }
+        },
+        "1920": {
+          "input": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "select": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "button": {
+            "top": 751.140625,
+            "bottom": 803.140625,
+            "height": 52
+          },
+          "label": {
+            "top": 723.34375,
+            "bottom": 747.140625,
+            "height": 23.796875
+          }
+        }
+      },
+      "mobile": {
+        "overflow": true,
+        "direction": "column"
+      }
+    },
+    {
+      "name": "B-mfa-setup-login-pending-verification",
+      "status": "PASS",
+      "setupSession": {
+        "hasUserId": true,
+        "hasMfaPending": false
+      },
+      "pendingSession": {
+        "hasUserId": false,
+        "hasMfaPending": true
+      },
+      "networkEvents": 46
+    }
+  ],
+  "network": [
+    {
+      "method": "GET",
+      "url": "/dishes"
+    },
+    {
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/dishes"
+    },
+    {
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/login"
+    },
+    {
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/login"
+    },
+    {
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "location": "/dishes",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/dishes"
+    },
+    {
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/account/security"
+    },
+    {
+      "method": "GET",
+      "url": "/account/security",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup"
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup",
+      "status": 303,
+      "location": "/account/security/setup",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/account/security/setup"
+    },
+    {
+      "method": "GET",
+      "url": "/account/security/setup",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup/confirm"
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup/confirm",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup/confirm"
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/setup/confirm",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/account/security"
+    },
+    {
+      "method": "GET",
+      "url": "/account/security",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/logout"
+    },
+    {
+      "method": "POST",
+      "url": "/logout",
+      "status": 303,
+      "location": "/login",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/login"
+    },
+    {
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/login"
+    },
+    {
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/login"
+    },
+    {
+      "method": "POST",
+      "url": "/login",
+      "status": 303,
+      "location": "/mfa",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/mfa"
+    },
+    {
+      "method": "GET",
+      "url": "/mfa",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/admin"
+    },
+    {
+      "method": "GET",
+      "url": "/admin",
+      "status": 303,
+      "location": "/login",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/login"
+    },
+    {
+      "method": "GET",
+      "url": "/login",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/mfa"
+    },
+    {
+      "method": "GET",
+      "url": "/mfa",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/mfa"
+    },
+    {
+      "method": "POST",
+      "url": "/mfa",
+      "status": 303,
+      "location": "/dishes",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/dishes"
+    },
+    {
+      "method": "GET",
+      "url": "/dishes",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/admin"
+    },
+    {
+      "method": "GET",
+      "url": "/admin",
+      "status": 303,
+      "location": "/admin/dishes",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/admin/dishes"
+    },
+    {
+      "method": "GET",
+      "url": "/admin/dishes",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/account/security"
+    },
+    {
+      "method": "GET",
+      "url": "/account/security",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/disable"
+    },
+    {
+      "method": "POST",
+      "url": "/account/security/disable",
+      "status": 303,
+      "location": "/account/security",
+      "setCookie": []
+    },
+    {
+      "method": "GET",
+      "url": "/account/security"
+    },
+    {
+      "method": "GET",
+      "url": "/account/security",
+      "status": 200,
+      "location": null,
+      "setCookie": []
+    }
+  ],
+  "secrets": "withheld",
+  "otp": "withheld",
+  "recoveryCodes": "withheld"
+}

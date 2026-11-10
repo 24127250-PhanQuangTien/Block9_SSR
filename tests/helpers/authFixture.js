@@ -4,10 +4,11 @@ const { randomUUID } = require("node:crypto");
 const security = require("../../src/services/crypto");
 process.env.SESSION_SECRET = security.random(48);
 process.env.OTP_PEPPER = security.random(48);
+process.env.MFA_ENCRYPTION_KEY = Buffer.from(security.random(32), "base64url").toString("base64");
 process.env.APP_BASE_URL = "http://localhost:3000";
 process.env.APP_ORIGIN = "http://localhost:3000";
 const password = "Fixture8" + security.random(16);
-const user = { id: randomUUID(), email: "fixture@example.test", status: "active", updatedAt: new Date(), passwordHash: null };
+const user = { id: randomUUID(), email: "fixture@example.test", status: "active", role: "admin", chefId: null, mfaEnabled: false, updatedAt: new Date(), passwordHash: null };
 const ready = security.hashPassword(password).then(hash => { user.passwordHash = hash; });
 
 function attachAuth(db) {

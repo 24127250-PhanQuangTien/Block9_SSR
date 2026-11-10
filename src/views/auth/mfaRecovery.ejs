@@ -1,0 +1,8 @@
+<%- include('../partials/header', { title }) %>
+<%- include('../partials/navbar', { solidNavbar: true }) %>
+<section class="section" style="padding-top: 120px;"><div class="container"><div class="form-card">
+  <div class="form-header"><h1 class="form-title">Mã Khôi Phục MFA</h1><p class="form-subtitle">Lưu các mã này ngay bây giờ. Chúng chỉ được hiển thị một lần.</p></div>
+  <ul><% codes.forEach(code => { %><li><code><%= code %></code></li><% }) %></ul>
+  <a class="btn btn--primary" href="/account/security">Đã lưu mã</a>
+</div></div></section>
+<%- include('../partials/footer') %>

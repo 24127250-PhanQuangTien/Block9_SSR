@@ -94,8 +94,8 @@
           <!-- Các nút thao tác trong chế độ Quản Trị -->
           <div class="detail-actions" style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; margin-top: 10px;">
             <a href="/admin/dishes" class="btn btn--primary">← Về Danh Sách Quản Trị</a>
-            <a href="/admin/dishes/<%= dish.id %>/edit" class="btn btn--outline" style="color: var(--charcoal);">Sửa Món Ăn</a>
-            <a href="/admin/dishes/<%= dish.id %>/delete" class="btn btn--ghost">Xóa Món Ăn</a>
+            <% if (can(currentUser, 'dish:update', dish)) { %><a href="/admin/dishes/<%= dish.id %>/edit" class="btn btn--outline" style="color: var(--charcoal);">Sửa Món Ăn</a><% } %>
+            <% if (can(currentUser, 'dish:delete')) { %><a href="/admin/dishes/<%= dish.id %>/delete" class="btn btn--ghost">Xóa Món Ăn</a><% } %>
           </div>
         </div>
       </div>

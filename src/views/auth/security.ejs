@@ -1,0 +1,37 @@
+<%- include('../partials/header', { title }) %>
+<%- include('../partials/navbar', { solidNavbar: true }) %>
+<section class="section" style="padding-top: 120px;"><div class="container"><div class="form-card">
+  <div class="form-header"><h1 class="form-title">Bảo Mật Tài Khoản</h1><p class="form-subtitle">MFA được quản lý riêng cho tài khoản hiện tại.</p></div>
+  <% if (error) { %><div class="alert alert-danger" role="alert"><%= error %></div><% } %>
+  <% if (!mfaEnabled) { %>
+    <p>MFA hiện đang tắt.</p>
+    <form action="/account/security/setup" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--primary">Bắt Đầu Thiết Lập MFA</button></form>
+  <% } else { %>
+    <p>MFA hiện đang bật.</p>
+    <hr>
+    <h2>Tạo lại mã khôi phục</h2>
+    <form action="/account/security/recovery/regenerate" method="POST" class="standard-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
+      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
+      <button class="btn btn--primary">Tạo nhóm mã mới</button>
+    </form>
+    <hr>
+    <h2>Thiết lập lại ứng dụng</h2>
+    <form action="/account/security/resetup" method="POST" class="standard-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
+      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
+      <button class="btn btn--primary">Đổi thiết bị MFA</button>
+    </form>
+    <hr>
+    <h2>Tắt MFA</h2>
+    <form action="/account/security/disable" method="POST" class="standard-form">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
+      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
+      <button class="btn btn--ghost">Tắt MFA</button>
+    </form>
+  <% } %>
+</div></div></section>
+<%- include('../partials/footer') %>
