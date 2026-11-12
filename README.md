@@ -1,99 +1,101 @@
-# Restaurant SSR — Block5 và Authentication Block8
+# Restaurant SSR — Block 5, 8 và 9
 
-Ứng dụng nhà hàng dùng Node.js, Express 4, EJS, Prisma 5 và PostgreSQL. CRUD, tìm kiếm, bộ lọc, sắp xếp và phân trang được render ở server; các thao tác ghi dùng form HTML và redirect303. Không SPA, fetch/AJAX, JWT hoặc phân quyền Block9.
+Ứng dụng quản lý nhà hàng render giao diện ở server, xây dựng bằng Node.js, Express 4, EJS, Prisma 5 và PostgreSQL. Dự án phát triển từ CRUD/phân trang SSR (Block 5), bổ sung xác thực tài khoản (Block 8), rồi phân quyền RBAC/ABAC và MFA (Block 9). Các thao tác chính dùng form HTML và redirect; không cần SPA hay JavaScript phía client để sử dụng các luồng này.
 
-## Trạng thái nghiệm thu
+## Chức năng
 
-Các chức năng chính của Block8 đã được triển khai và có kiểm thử: đăng ký với CAPTCHA, OTP kích hoạt, đăng nhập/chống brute force, session bền vững, đăng xuất, quên/đặt lại mật khẩu và bảo vệ toàn bộ CRUD.
+- Thực đơn công khai: xem và phân trang món đã xuất bản tại `/dishes`.
+- Quản trị SSR: quản lý món ăn, đầu bếp và nguyên liệu tại `/admin`.
+- Tài khoản: đăng ký với CAPTCHA, kích hoạt bằng OTP email, đăng nhập, đăng xuất, quên và đặt lại mật khẩu.
+- Bảo mật phiên: session lưu trong PostgreSQL; form ghi được bảo vệ CSRF; có giới hạn thử và cookie bảo mật.
+- RBAC: `viewer` chỉ xem; `editor` được tạo và cập nhật; `admin` được tạo, cập nhật và xóa.
+- ABAC: editor chỉ cập nhật món `draft` được gán cho đầu bếp của mình; admin có thể cập nhật mọi món.
+- MFA tùy chọn cho tài khoản: TOTP qua ứng dụng xác thực, mã khôi phục dùng một lần, bật/tắt và cấu hình lại từ trang bảo mật tài khoản.
 
-Người dùng đã xác nhận đăng ký → CAPTCHA → nhận OTP qua email thật → kích hoạt → đăng nhập → vào `/dishes?pageSize=10&page=1`. Đây là xác nhận thao tác thực tế của người dùng, không phải ảnh/email/token do test tự động thu thập. Lỗi SMTP535 trước đó là lịch sử, không còn là kết luận hiện tại về luồng OTP này.
+Người đăng ký mới luôn nhận role `viewer`; role và `chefId` không được lấy từ form đăng ký. Tài khoản đã bật MFA phải xác minh yếu tố thứ hai trước khi nhận session đăng nhập đầy đủ.
 
-**Chưa tuyên bố hoàn tất100% hồ sơ nộp bài.** Slide63 còn cần ảnh UI/Network/Application và request trực tiếp cho từng kịch bản, cùng sơ đồ do nhóm tự vẽ. GET vẫn ghi metadata session/CAPTCHA/counter bảo mật; timing chống dò email chưa được bảo đảm. Xem [báo cáo audit hiện tại](BLOCK8_AUTHENTICATION_AUDIT_REPORT.md), [kết quả nghiệm thu](docs/BLOCK8_FINAL_ACCEPTANCE.md) và [cách kiểm chứng](docs/VERIFY.md).
+## Yêu cầu
 
-| Bằng chứng audit ngày 04/11 | Kết quả | Phạm vi |
-|---|---|---|
-| `npm.cmd test` | 24/24PASS | Validation, HTTP/EJS, phân trang, auth security; persistence fixture offline |
-| HTTP/Prisma | 21/21 nhóm PASS,276 request | Schema PostgreSQL ngẫu nhiên, SMTP local, hai server process; [JSON](docs/evidence/auth-release-http/http-results.json) |
-| Chrome native form | 4/4PASS,45 ảnh | 1440/375px × JS bật/tắt, auth và hai list sau login; [JSON](docs/evidence/auth-release-browser/browser-results.json) |
-| OTP email thật | Người dùng xác nhận thành công | Không lưu địa chỉ, OTP, cookie hay credential vào repo |
+- Node.js tương thích với các dependency trong `package-lock.json`.
+- PostgreSQL có thể truy cập từ máy chạy ứng dụng.
+- npm.
 
-HTTP hoàn tất 2026-11-04T15:48:33.647Z; Chrome hoàn tất 2026-11-04T15:45:29.306Z, phiên bản156.0.8078.80. Đây là lượt chạy source ngày 04/11, gồm logging mail an toàn. Không lấy số test offline làm bằng chứng SMTP/inbox hoặc production.
+## Cài đặt và khởi chạy
 
-**Kiểm thử sau cập nhật ngày 06/11:** offline **25/25 PASS**; [HTTP](docs/evidence/auth-public-menu-http-verified/http-results.json) **22/22 nhóm PASS, 292 request**; [Chrome](docs/evidence/auth-public-menu-browser/browser-results.json) **4/4 PASS, 49 ảnh**. Các schema thử đã được dọn; không ghi dữ liệu vào schema nhà hàng. Các kết quả này không tự chấm lại ma trận audit ngày 04/11.
-
-## Chạy ứng dụng
-
-Cần Node.js tương thích dependency Argon2 trong lockfile và PostgreSQL có thể kết nối từ máy chạy app.
-
-```powershell
-npm.cmd ci
-# Chỉ tạo .env khi chưa có; không ghi đè cấu hình đang dùng.
-Copy-Item .env.example .env
-npm.cmd run auth:configure
-npx.cmd prisma generate
-npm.cmd start
-# Hoặc npm.cmd run dev
+```sh
+npm ci
+cp .env.example .env
 ```
 
-Điền `DATABASE_URL`, `SESSION_SECRET`, `OTP_PEPPER`, `APP_BASE_URL` và `APP_ORIGIN` trong `.env` riêng. Hai secret cần ít nhất32 ký tự; hai URL cùng origin với URL mở trong browser. Production cần HTTPS và `TRUST_PROXY` đúng hạ tầng. `.env` được Git ignore, không commit hoặc gửi vào chat.
+Trên Windows PowerShell, dùng `Copy-Item .env.example .env` thay cho lệnh `cp`. Chỉnh `.env` cục bộ với thông tin database và URL phù hợp (`APP_BASE_URL`, `APP_ORIGIN`); không commit hoặc chia sẻ file này.
 
-Với database hiện có đã có schema auth, không chạy migration/seed/reset chỉ để khởi động lại app. Với database cần cài auth lần đầu, đọc [chính sách/schema](docs/auth-policy.md), rà migration trước khi chạy `npm.cmd run db:auth`. `npm.cmd run seed:auth` là tùy chọn tạo active viewer từ cấu hình local nếu chưa tồn tại; không cần seed để dùng luồng đăng ký.
+Tiếp theo, sinh các khóa auth còn thiếu, tạo Prisma Client và áp dụng migration:
 
-**Không chạy `npm.cmd run seed`, `db:push` hoặc reset trên dữ liệu nhà hàng cần giữ.** Script seed cũ xóa/nạp lại dữ liệu CRUD. Bộ nghiệm thu Block8 chỉ ghi vào schema test ngẫu nhiên riêng.
+```sh
+npm run auth:configure
+npx prisma generate
+npm run db:auth
+npm start
+```
+
+Mở URL theo `APP_BASE_URL` (mặc định `http://localhost:3000`). Trong lúc phát triển có thể dùng `npm run dev` để tự khởi động lại server khi source thay đổi. `TRUST_PROXY` chỉ nên cấu hình theo đúng proxy tin cậy của deployment.
+
+`npm run db:auth` triển khai migration PostgreSQL. Sao lưu database và kiểm tra môi trường đích trước khi chạy migration. Không dùng `db:push`, reset hoặc seed nhà hàng như cách triển khai auth trên database có dữ liệu cần giữ.
+
+### Tài khoản thử nghiệm RBAC
+
+Có thể tạo bốn tài khoản fixture cho môi trường development/test bằng cách điền các biến `SEED_VIEWER_*`, `SEED_EDITOR_A_*`, `SEED_EDITOR_B_*`, `SEED_ADMIN_*` trong `.env`, rồi chạy:
+
+```sh
+npm run seed:auth
+```
+
+Lệnh này tạo/cập nhật bốn tài khoản fixture và bảo đảm có đầu bếp `Bếp A`/`Bếp B`. Nếu email fixture đã tồn tại, thuộc tính tài khoản tương ứng sẽ được cập nhật theo cấu hình. Chỉ chạy trên database phù hợp; không dùng tài khoản production làm fixture. Script không in credential.
 
 ## Email
 
-```powershell
-npm.cmd run mail:configure
-npm.cmd run mail:check
+Thiết lập SMTP từ terminal riêng:
+
+```sh
+npm run mail:configure
+npm run mail:check
 ```
 
-Nhập credential trong terminal riêng; các trường email/mật khẩu được ẩn. `mail:check` chỉ kiểm tra kết nối/xác thực, không gửi thư. Sau khi đổi cấu hình, restart server. Hướng dẫn Gmail/App Password và giải thích mã lỗi an toàn ở [MAIL_SETUP](docs/MAIL_SETUP.md).
+`mail:check` kiểm tra kết nối/xác thực SMTP, không gửi email và không chứng minh thư đã tới inbox. Thiếu SMTP trong development, ứng dụng dùng Ethereal; preview chỉ dùng để kiểm tra cục bộ và cần được giữ riêng. Production yêu cầu SMTP, không dùng fallback Ethereal. Hướng dẫn chi tiết ở [docs/MAIL_SETUP.md](docs/MAIL_SETUP.md).
 
-Development thiếu SMTP dùng Ethereal: thư không tới inbox thật, preview link phải giữ riêng. Production không fallback Ethereal. App không log password, OTP, reset token, CAPTCHA answer hoặc giá trị cookie; lỗi SMTP chỉ log category/code/status được phép. SMTP lỗi không làm phản hồi đăng ký/forgot tiết lộ tài khoản tồn tại.
+## Phân trang
 
-## Routes và xác thực
+Hai trang danh sách món `/dishes` và `/admin/dishes` dùng query string, form GET và liên kết HTML, hoạt động khi tắt JavaScript. Mặc định là trang 1, 10 món/trang; UI cung cấp 10/20/50, backend chấp nhận page size từ 1 đến 100 và kiểm tra input trước khi truy vấn. Trang công khai tìm theo tên; trang quản trị hỗ trợ tìm kiếm, lọc và sắp xếp. Ví dụ:
 
-- Public: GET `/`, `/dishes`, `/dishes/:id`; GET/POST `/register`, `/activate`, `/login`, `/forgot`, `/reset`; POST `/activate/resend`; GET `/forgot/sent`, `/captcha/new`; static assets.
-- Protected: `/admin`, toàn bộ `/admin/dishes`, `/admin/chefs`, `/admin/ingredients`, và POST `/logout`.
-- Chưa đăng nhập gọi CRUD quản trị bằng bất kỳ method nào đều303 `/login`; pending không có session authenticated. Login active đổi SID, lưu session trong PostgreSQL. Logout và reset thu hồi session phía server.
-- Mọi form ghi có CSRF; Origin được kiểm tra. Ngoại lệ native reset Origin:null chỉ cho POST `/reset` + Fetch Metadata same-origin + CSRF đúng.
-- `role` do server gán mặc định viewer; mọi active user được CRUD theo phạm vi bài. Chưa làm RBAC/ABAC.
-
-## Phân trang SSR
-
-Hai list `/dishes` và `/admin/dishes` dùng URL, form GET và liên kết HTML, hoạt động khi tắt JavaScript.
-
-- Mặc định page1/pageSize10; UI chọn10/20/50, backend chấp nhận pageSize1–100. Tham số sai, trùng, array/object hoặc vượt giới hạn offset trả HTML400 trước truy vấn.
-- Khách tìm theo tên, ID tăng dần. Quản trị tìm tên/mô tả, lọc category/status, sort giá/tên/ngày tạo; sort thêm ID để xử lý giá trị bằng nhau.
-- Prisma `count/skip/take` lấy đúng trang cùng quan hệ đầu bếp/nguyên liệu. Form tìm/lọc/đổi pageSize về page1; link giữ điều kiện hợp lệ và mã hóa tiếng Việt.
-- Trang vượt phạm vi303 về trang cuối hoặc page1 khi rỗng; lỗi DB vẫn HTML500. Không tải toàn bộ danh sách rồi phân trang trong browser.
-- Trước/Sau, cửa sổ số trang, `aria-current`, trạng thái disabled và vùng cuộn bảng hỗ trợ desktop/375px, bàn phím, Back/Forward.
-
-Ví dụ: `/dishes?q=ph%E1%BB%9F&pageSize=20&page=2`, `/admin/dishes?status=available&sort=newest&pageSize=10&page=2`.
+```text
+/dishes?q=pho&pageSize=20&page=2
+/admin/dishes?status=available&sort=newest&pageSize=10&page=2
+```
 
 ## Kiểm thử
 
-```powershell
-npm.cmd test
-npm.cmd run test:auth
-# Công cụ browser nằm ngoài dependency/lockfile app:
-npm.cmd install --prefix "$env:TEMP\ssr-pagination-playwright" playwright@1.64.1
-npm.cmd run test:auth -- --browser
-# Chỉ chạy4 context browser:
-npm.cmd run test:auth -- --browser --browser-only
+```sh
+npm test
 ```
 
-Harness HTTP mặc định dùng port3108; đặt `AUTH_TEST_PORT` khi cần và `AUTH_EVIDENCE_DIR` để giữ riêng từng lượt. Browser-only cần cả hai cờ; HTTP checks0 của chế độ này không thay cho kết quả4 ca trong browser-results. Harness dùng schema `auth_test_<24 hex>`, secret test sinh trong RAM và SMTP TCP local; dọn schema/process sau khi chạy. Không dùng `test:db`/seed nhà hàng cũ để nghiệm thu Block8.
+Các script chuyên biệt được khai báo trong `package.json`:
+
+```sh
+npm run test:db
+npm run test:auth
+npm run test:browser
+npm run test:pagination:real
+```
+
+Một số kiểm thử cần PostgreSQL, cấu hình môi trường hoặc browser đã cài riêng. Đọc hướng dẫn trong từng test và dùng database test riêng; không chạy fixture/kiểm thử lên dữ liệu nhà hàng cần giữ. `npm run seed` là seed dữ liệu ứng dụng cũ, không phải seed auth.
 
 ## Tài liệu
 
-- [Audit source và34 tiêu chí](BLOCK8_AUTHENTICATION_AUDIT_REPORT.md)
-- [Tóm tắt nghiệm thu và phần còn thiếu](docs/BLOCK8_FINAL_ACCEPTANCE.md)
-- [Chính sách authentication](docs/auth-policy.md)
-- [Kịch bản kiểm chứng và chụp DevTools](docs/VERIFY.md)
-- [Sơ đồ tham khảo và câu hỏi trình bày](docs/flows.md)
-- [Lỗi agent reset403: trước/sau](docs/BUG_RESET_BROWSER_403.md)
-- [Lựa chọn kỹ thuật](tech-choice.md), [thay đổi](docs/CHANGES.md), [prompt yêu cầu](docs/requirements/)
-
-Nguồn bài tập: [Block8, slide48–63](https://pub.nndkhoa9.win/web/week6/block8-deck.html). Đã đọc lại66 slide khi cập nhật tài liệu. Các số liệu database hoặc test cũ trong Git history không được dùng làm số lượng dữ liệu hiện tại.
+- [Lựa chọn kỹ thuật Block 9](tech-choice.md)
+- [Chính sách auth và RBAC/MFA](docs/auth-policy.md)
+- [Thiết lập email](docs/MAIL_SETUP.md)
+- [Các luồng ứng dụng](docs/flows.md)
+- [Lịch sử thay đổi](docs/CHANGES.md)
+- [Kết quả nghiệm thu và giới hạn đã ghi nhận](docs/BLOCK8_FINAL_ACCEPTANCE.md)
+- [Kiểm chứng authentication](docs/VERIFY.md)
+- [Migration PostgreSQL](prisma/migrations/)
