@@ -1,0 +1,15 @@
+Noto Sans, Copyright 2022 The Noto Project Authors.
+License: SIL Open Font License 1.1; see OFL.txt.
+
+Source downloaded 2026-10-23:
+https://github.com/google/fonts/blob/main/ofl/notosans/NotoSans%5Bwdth,wght%5D.ttf
+Source SHA-256: BFB7BB691513F12E734DC346C03A03F784912432D7E3FA8E56EFCF906FE86B3D
+
+Derived with fontTools varLib.instancer and subset, compressed as WOFF2:
+- width axis fixed at 100; weight axis retained from 400 through 700.
+- Unicode U+0020-024F, U+0300-036F, U+1E00-1EFF, U+2000-206F, U+20A0-20CF.
+- All layout features retained, including mark positioning and composition.
+- A single face covers both Latin letters and Vietnamese combining marks.
+
+Used by .standard-form and SelectField controls/popups under the CSS family
+alias Restaurant Form Sans.

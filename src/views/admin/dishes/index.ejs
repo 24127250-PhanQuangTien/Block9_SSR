@@ -6,7 +6,7 @@
     <div class="admin-header">
       <div>
         <h1 class="admin-header__title">Quản Trị Món Ăn</h1>
-        <p class="admin-header__subtitle">Danh sách toàn bộ các món ăn trong cơ sở dữ liệu Supabase.</p>
+        <p class="admin-header__subtitle">Danh sách toàn bộ các món ăn trong hệ thống.</p>
       </div>
       <div>
         <% if (can(currentUser, 'dish:create')) { %>
@@ -16,7 +16,14 @@
     </div>
 
     <!-- Thanh Tìm Kiếm + Bộ Lọc Đa Tiêu Chí (SSR Form GET chuẩn, không AJAX) -->
-    <div class="admin-filter-card">
+    <div class="admin-filter-card dish-search-panel">
+      <div class="dish-results-toolbar"><span class="dish-results-count"><%= pagination.total.toLocaleString('vi-VN') %> món phù hợp</span></div>
+      <div class="dish-category-strip" aria-label="Lọc nhanh theo phân loại">
+        <span class="category-filter-label">Phân loại:</span>
+        <% ['', ...categories].forEach(function(cat) { const params = new URLSearchParams({ ...filters, category: cat, page: '1', pageSize: String(pagination.pageSize) }); %>
+          <a href="/admin/dishes?<%= params.toString() %>" class="category-pill <%= (filters.category || '') === cat ? 'active' : '' %>"><%= cat || 'Tất cả' %></a>
+        <% }); %>
+      </div>
       <form action="/admin/dishes" method="GET" autocomplete="off" class="admin-filter-form admin-filter-form--paginated">
         <input type="hidden" name="page" value="1">
         <!-- 1. Ô tìm kiếm từ khóa -->

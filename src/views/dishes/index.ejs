@@ -1,34 +1,35 @@
 <%- include('../partials/header', { title: 'Thực Đơn - RESTORAN' }) %>
 <%- include('../partials/navbar') %>
 
-<!-- Page Hero Section từ Bistro Template -->
-<section class="page-hero">
-  <div class="page-hero__bg">
-    <img src="/assets/img/menu-bg.svg" alt="Thực Đơn RESTORAN">
-  </div>
+<section class="page-hero menu-hero" aria-labelledby="menu-hero-title">
+  <picture class="page-hero__bg" aria-hidden="true"><source media="(max-width: 600px)" srcset="/assets/img/menu-hero-800.webp"><img src="/assets/img/menu-hero-1600.webp" width="1600" height="666" alt="" fetchpriority="high" decoding="async"></picture>
   <div class="page-hero__overlay"></div>
   <div class="container page-hero__content">
-    <h1 class="page-hero__title">Thực Đơn Nhà Hàng</h1>
-    <p class="page-hero__breadcrumb"><a href="/dishes">Trang Chủ</a> &nbsp;/&nbsp; Thực Đơn</p>
+    <div class="hero-pill-badge"><span class="hero-pill-badge__dot"></span><span>TINH HOA ẨM THỰC BISTRO VIỆT NAM</span></div>
+    <h1 id="menu-hero-title" class="page-hero__title">Hương Vị Việt Trọn Vẹn Từng Món Ăn</h1>
+    <p class="page-hero__description">Thưởng thức tinh hoa ẩm thực truyền thống Việt Nam trong không gian Bistro đương đại, phục vụ tận tâm từ nguồn nguyên liệu tươi sạch mỗi ngày.</p>
+    <div class="hero-actions"><a href="#thuc-don" class="hero-btn-main">Khám Phá Thực Đơn <%- include('../partials/icon', { name: 'down' }) %></a></div>
+    <div class="hero-stats">
+      <% [['star','4.9/5','Đánh giá hài lòng'],['leaf','100%','Nguyên liệu tươi sạch'],['chef','10+','Bếp trưởng đạt chuẩn']].forEach(([icon,number,label], i) => { %>
+        <% if(i) { %><div class="hero-stat-divider" aria-hidden="true"></div><% } %>
+        <div class="hero-stat-item"><span class="hero-stat-number"><%- include('../partials/icon', { name: icon }) %> <%= number %></span><span class="hero-stat-label"><%= label %></span></div>
+      <% }); %>
+    </div>
   </div>
 </section>
-
-<!-- Menu Section -->
-<section class="section">
+<section class="section menu-section" id="thuc-don">
   <div class="container">
-    <div class="section-header">
-      <span class="section-header__label">Tuyển Chọn Tinh Hoa</span>
-      <h2 class="section-header__title">Hương Vị Đặc Sắc</h2>
-      <div class="section-header__divider"></div>
-      <p class="section-header__text">Mỗi món ăn bắt đầu từ những nguyên liệu tươi ngon nhất, chuẩn bị bởi kỹ nghệ ẩm thực gia truyền.</p>
-    </div>
-
+    <div class="section-header cuisine-heading"><span class="section-header__label">RESTORAN CUISINE</span><h2>Thực Đơn Món Ăn</h2><div class="section-header__divider"></div><p>Khám phá tinh hoa ẩm thực truyền thống và đương đại, phục vụ tận tâm mỗi ngày.</p></div>
     <!-- Thanh Tìm Kiếm (Form GET chuẩn, không fetch/AJAX) -->
-    <div class="search-section">
-      <form action="/dishes" method="GET" autocomplete="off" class="search-form search-form--paginated">
+    <div class="dish-search-panel">
+      <div class="dish-results-toolbar"><span class="dish-results-count"><%= pagination.total.toLocaleString('vi-VN') %> món phù hợp</span></div>
+      <form action="/dishes" method="GET" autocomplete="off" class="dish-search-form">
         <input type="hidden" name="page" value="1">
-        <div class="search-input-group">
+        <div class="dish-search-primary-fields ssr-public-search">
+        <div class="dish-form-field">
+          <label for="dish-query">Từ khóa</label>
           <input 
+            id="dish-query"
             type="text" 
             name="q" 
             aria-label="Tìm món ăn theo tên"
@@ -36,12 +37,13 @@
             placeholder="Tìm món ăn theo tên (Ví dụ: Phở, Bún chả...)" 
             class="search-input"
           >
-          <% if (q) { %>
-            <a href="/dishes" class="btn-clear" title="Xóa bộ lọc">✕</a>
-          <% } %>
         </div>
-        <div class="page-size-field"><%- include('../partials/pageSize') %></div>
-        <button type="submit" class="btn btn--primary">Tìm Kiếm</button>
+        <div class="dish-form-field"><%- include('../partials/pageSize') %></div>
+        </div>
+        <div class="dish-search-footer"><div class="dish-search-actions">
+          <button type="submit" class="btn btn--primary"><%- include('../partials/icon', { name: 'search' }) %> Tìm Kiếm</button>
+          <a href="/dishes" class="btn btn--outline">Xóa điều kiện</a>
+        </div></div>
       </form>
       <% if (q) { %>
         <div class="search-status">
@@ -68,7 +70,7 @@
         %>
           <div class="menu-item">
             <div class="menu-item__image">
-              <img src="<%= displayImg %>" alt="<%= dish.name %>" onerror="this.onerror=null; this.src='<%= fallbackImg %>';">
+              <img loading="lazy" decoding="async" src="<%= displayImg %>" alt="<%= dish.name %>" onerror="this.onerror=null; this.src='<%= fallbackImg %>';">
             </div>
             <div class="menu-item__info">
               <div class="menu-item__header">
@@ -76,22 +78,13 @@
                 <span class="menu-item__dots"></span>
                 <span class="menu-item__price"><%= dish.price.toLocaleString('vi-VN') %> đ</span>
               </div>
-              <p class="menu-item__desc">
-                <%= dish.description ? dish.description : 'Món ăn đặc sản mang đậm phong vị ẩm thực truyền thống.' %>
-              </p>
-              <% if (dish.chef || (dish.ingredients && dish.ingredients.length > 0)) { %>
-                <div style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-                  <% if (dish.chef) { %>
-                    <span style="color: var(--burgundy); font-weight: 600;">👨‍🍳 <%= dish.chef.name %></span>
-                  <% } %>
-                  <% if (dish.ingredients && dish.ingredients.length > 0) { %>
-                    <span>• 🥗 <%= dish.ingredients.slice(0, 3).map(i => i.name).join(', ') %><%= dish.ingredients.length > 3 ? '...' : '' %></span>
-                  <% } %>
-                </div>
-              <% } %>
+              <div class="dish-card-meta">
+                <span class="dish-card-meta__line">Bếp: <%= dish.chef ? dish.chef.name : 'Đang cập nhật' %></span>
+                <span class="dish-card-meta__line">Nguyên liệu: <%= dish.ingredients && dish.ingredients.length ? dish.ingredients.map(i => i.name).join(', ') : 'Đang cập nhật' %></span>
+              </div>
               <div class="menu-item__tags">
                 <% if (dish.category) { %>
-                  <span class="menu-item__tag"><%= dish.category %></span>
+                  <span class="menu-item__tag menu-item__tag--cat"><%= dish.category %></span>
                 <% } %>
                 <span class="menu-item__tag <%= dish.available ? 'menu-item__tag--available' : 'menu-item__tag--unavailable' %>">
                   <%= dish.available ? 'Đang phục vụ' : 'Tạm hết' %>

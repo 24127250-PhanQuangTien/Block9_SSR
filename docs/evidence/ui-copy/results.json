@@ -1,0 +1,307 @@
+[
+  {
+    "width": 375,
+    "route": "/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/login",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/register",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/forgot",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/activate",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/dishes/new",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/dishes/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/dishes/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/chefs",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/chefs/new",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/chefs/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/chefs/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/ingredients",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/ingredients/new",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/ingredients/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/admin/ingredients/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/account/security",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/login",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/register",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/forgot",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/activate",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/dishes/new",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/dishes/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/dishes/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/chefs",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/chefs/new",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/chefs/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/chefs/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/ingredients",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/ingredients/new",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/ingredients/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/admin/ingredients/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 844,
+    "route": "/account/security",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/login",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/register",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/forgot",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/activate",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/dishes/new",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/dishes/1",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/dishes/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/dishes/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/chefs",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/chefs/new",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/chefs/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/chefs/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/ingredients",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/ingredients/new",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/ingredients/1/edit",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/admin/ingredients/1/delete",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/account/security",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "javascript": false,
+    "status": "PASS"
+  }
+]

@@ -1,7 +1,7 @@
 <%- include('../partials/header') %>
 <%- include('../partials/navbar', { solidNavbar: true }) %>
-<section class="auth-section"><div class="auth-card">
-  <p class="auth-eyebrow">RESTORAN · Tài khoản</p>
-  <h1><%= title %></h1>
+<section class="auth-section auth-page-container"><div class="auth-card auth-card-pro">
+  <div class="auth-intro"><div class="auth-icon-badge"><%- include('../partials/icon', { name: 'user' }) %></div>
+  <h1 class="auth-card-title"><%= title %></h1><p class="auth-card-desc">Truy cập vào hệ thống quản lý RESTORAN</p></div>
   <% if (typeof message !== 'undefined' && message) { %><p class="auth-message" role="status"><%= message %></p><% } %>
   <% if (typeof error !== 'undefined' && error) { %><p class="auth-error" role="alert" data-error-code="<%= typeof code !== 'undefined' && code ? code : 'VALIDATION_FAILED' %>"><%= error %></p><% } %>

@@ -1,0 +1,32 @@
+[
+  {
+    "width": 375,
+    "route": "/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/dishes?page=2",
+    "status": "PASS"
+  },
+  {
+    "width": 375,
+    "route": "/login",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/dishes",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/dishes?page=2",
+    "status": "PASS"
+  },
+  {
+    "width": 1440,
+    "route": "/login",
+    "status": "PASS"
+  }
+]

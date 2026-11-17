@@ -1,0 +1,65 @@
+/* EJS adapters for the Block9 reference UI. */
+.skip-link { position: fixed; top: -100px; left: 16px; z-index: 2000; padding: 12px 20px; background: white; color: #1c1917; }
+.skip-link:focus { top: 12px; }
+.navbar__inner { width: 100%; max-width: 100%; padding: 0 clamp(20px, 3.5vw, 48px); }
+.navbar__auth { display: flex; align-items: center; gap: 10px; margin-left: 8px; }
+.navbar__auth .btn { padding: 6px 14px; font-size: 13px; }
+.navbar__toggle { position: relative; z-index: 1100; color: white; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; }
+.navbar__toggle .ui-icon { width: 24px; height: 24px; }
+.navbar__backdrop[hidden] { display: none; }
+.account-menu { position: relative; margin-left: 12px; }
+.account-menu summary { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 1px solid #ffffff40; border-radius: 20px; background: #ffffff1f; color: white; cursor: pointer; font-size: 13px; min-height: 44px; }
+.account-email { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-menu__panel { position: absolute; top: calc(100% + 10px); right: 0; width: 240px; background: white; border-radius: 14px; box-shadow: 0 18px 40px #0003; padding: 8px 0; color: #1f2937; }
+.account-menu__panel p { padding: 10px 16px; font-size: 13px; overflow-wrap: anywhere; border-bottom: 1px solid #f3f4f6; }
+.account-menu__panel a,.account-menu__panel button { display: block; padding: 10px 16px; min-height: 44px; font: inherit; font-size: 13px; background: none; border: 0; width: 100%; text-align: left; cursor: pointer; }
+.account-menu__panel a:hover,.account-menu__panel button:hover { background: #f9fafb; }
+.account-menu__panel button { color: #dc2626; }
+.footer-grid { grid-template-columns: 1.5fr 1fr 1fr; }
+.cuisine-heading { margin: 8px 0 36px; }
+.cuisine-heading h2 { font: 700 clamp(2.1rem,3.8vw,2.75rem) 'Playfair Display',Georgia,serif; color: #1a202c; margin-bottom: 14px; }
+.cuisine-heading p { max-width: 520px; margin: auto; color: #64748b; }
+.hero-stat-number .ui-icon { display: inline-block; color: #f59e0b; }
+.dish-search-panel.search-section { max-width: none; }
+.menu-item__name { overflow-wrap: anywhere; }
+.menu-item__tags { flex-wrap: wrap !important; }
+.menu-item__tag { max-width: 100%; white-space: normal !important; overflow-wrap: anywhere; }
+.search-section.dish-search-panel { padding: 24px; }
+.ssr-public-search { grid-template-columns: minmax(0, 1fr) minmax(130px, .3fr); }
+.dish-search-actions .btn { min-height: 44px; }
+.category-pill { display: inline-flex; align-items: center; min-height: 36px; }
+.password-field { position: relative; }
+.password-field input { padding-right: 64px !important; }
+.password-toggle { position: absolute; right: 8px; top: 0; height: 100%; background: none; border: 0; padding: 0 8px; color: #57534e; cursor: pointer; font: inherit; font-size: 13px; }
+.auth-section.auth-page-container { min-height: calc(100vh - 80px); }
+.auth-card.auth-card-pro { max-width: 480px; margin: 0; border-radius: 20px; padding: 36px 32px; box-shadow: 0 20px 40px -15px #1c191714; }
+.auth-intro { text-align: center; margin-bottom: 26px; }
+.auth-card .auth-card-title { font-size: 1.65rem; margin: 0 0 6px; }
+.auth-card .auth-form label { font-size: 14px; font-weight: 500; color: #374151; }
+.auth-card .auth-form input:not([type="hidden"]) { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 16px; }
+.auth-card .auth-form .btn { border-radius: 8px; }
+.auth-links { justify-content: center; font-size: 13px; }
+.auth-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 8px; }
+.auth-message { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; }
+.auth-captcha { background: #f9fafb; padding: 14px; border: 1px solid #e5e7eb; border-radius: 8px; }
+:where(a,button,input,select,textarea,summary):focus-visible { outline: 3px solid #d97706; outline-offset: 3px; }
+html { scroll-padding-top: 100px; }
+@media(max-width: 768px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .navbar__menu { z-index: 1050; }
+  .navbar__backdrop:not([hidden]) { display: block; position: fixed; inset: 0; width: 100%; height: 100dvh; border: 0; background: #0008; z-index: 1040; }
+  .navbar__auth { flex-wrap: wrap; margin: 16px 0 0; width: 100%; }
+  .account-menu { margin: 16px 0 0; width: 100%; }
+  .account-menu__panel { position: static; margin-top: 8px; width: 100%; }
+  .account-email { max-width: 145px; }
+  .ssr-public-search { grid-template-columns: minmax(0, 1fr); }
+  .menu-item__tags { gap: 6px; }
+  .menu-item__tag { white-space: normal !important; }
+  html:not(.js) .navbar__menu { position: static; visibility: visible; pointer-events: auto; height: auto; width: 100%; padding: 12px; }
+  html:not(.js) .navbar__inner { flex-wrap: wrap; }
+  html:not(.js) .navbar__toggle { display: none; }
+}
+@media(max-width: 576px) { .auth-card.auth-card-pro { padding: 28px 20px; } }
+@media(prefers-reduced-motion: reduce) {
+  *,*::before,*::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}

@@ -1,40 +1,36 @@
-<nav class="navbar <%= typeof isAdmin !== 'undefined' && isAdmin ? 'navbar--admin' : '' %> <%= typeof currentUser !== 'undefined' && currentUser ? 'navbar--authenticated' : '' %> <%= typeof solidNavbar !== 'undefined' && solidNavbar ? 'navbar--auth' : '' %>">
-  <div class="container navbar__inner">
-    <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
-      <!-- Logo và Thương hiệu phía Quản Trị -->
-      <a href="/admin/dishes" class="navbar__logo">
-        <img src="/assets/img/logo-white.svg" alt="RESTORAN ADMIN">
-      </a>
-      <div class="navbar__menu">
-        <a href="/admin/dishes" class="navbar__link <%= currentPath.startsWith('/admin/dishes') ? 'navbar__link--active' : '' %>">Món Ăn</a>
-        <a href="/admin/chefs" class="navbar__link <%= currentPath.startsWith('/admin/chefs') ? 'navbar__link--active' : '' %>">Đầu Bếp</a>
-        <a href="/admin/ingredients" class="navbar__link <%= currentPath.startsWith('/admin/ingredients') ? 'navbar__link--active' : '' %>">Nguyên Liệu</a>
-        <a href="/dishes" class="navbar__link navbar__link--client">Xem Trang Khách →</a>
-      </div>
-    <% } else { %>
-      <!-- Logo và Menu phía Thực Khách (Chỉ đọc) -->
-      <a href="/dishes" class="navbar__logo">
-        <img src="/assets/img/logo-white.svg" alt="RESTORAN">
-      </a>
-      <div class="navbar__menu">
-        <a href="/dishes" class="navbar__link <%= currentPath === '/dishes' ? 'navbar__link--active' : '' %>">Thực Đơn</a>
-        <a href="/admin/dishes" class="navbar__link navbar__link--admin">Cổng Quản Trị</a>
-      </div>
-    <% } %>
-
-    <button class="navbar__toggle" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
+<% const adminNav = typeof isAdmin !== 'undefined' && isAdmin;
+const solidNav = adminNav || (typeof solidNavbar !== 'undefined' && solidNavbar);
+const currentPathSafe = typeof currentPath === 'string' ? currentPath : '';
+%>
+<nav aria-label="Điều hướng chính" class="navbar <%= adminNav ? 'navbar--admin' : '' %> <%= solidNav ? 'navbar--auth' : '' %>">
+  <button type="button" class="navbar__backdrop" aria-label="Đóng menu" tabindex="-1" hidden></button>
+  <div class="navbar__inner">
+    <a href="<%= adminNav ? '/admin/dishes' : '/dishes' %>" class="navbar__logo"><img src="/assets/img/logo-white.svg" alt="RESTORAN"></a>
+    <div class="navbar__menu" id="main-navigation">
+      <% if (adminNav) { %>
+        <% [['dishes','Món Ăn'],['chefs','Đầu Bếp'],['ingredients','Nguyên Liệu']].forEach(([path,label]) => { %>
+          <a href="/admin/<%= path %>" class="navbar__link <%= currentPathSafe.startsWith('/admin/'+path) ? 'navbar__link--active' : '' %>" <%- currentPathSafe.startsWith('/admin/'+path) ? 'aria-current="page"' : '' %>><%= label %></a>
+        <% }); %>
+        <a href="/dishes" class="navbar__link navbar__link--client">Xem Trang Khách <%- include('icon', { name: 'arrow' }) %></a>
+      <% } else { %>
+        <a href="/dishes" class="navbar__link <%= currentPathSafe === '/dishes' ? 'navbar__link--active' : '' %>">Thực Đơn</a>
+        <% if (currentUser) { %><a href="/admin/dishes" class="navbar__link navbar__link--admin">Cổng Quản Trị</a><% } %>
+      <% } %>
+      <% if (currentUser) { %>
+        <details class="account-menu">
+          <summary><%- include('icon', { name: 'user' }) %><span class="account-email"><%= currentUser.email %></span></summary>
+          <div class="account-menu__panel">
+            <p><strong>Tài khoản</strong><br><span><%= currentUser.email %></span></p>
+            <a href="/account/security">Bảo Mật Tài Khoản</a>
+            <a href="/forgot">Đặt lại mật khẩu</a>
+            <form action="/logout" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button type="submit">Đăng Xuất</button></form>
+          </div>
+        </details>
+      <% } else { %>
+        <div class="navbar__auth"><a href="/login" class="navbar__link">Đăng Nhập</a><a href="/register" class="btn btn--primary">Đăng Ký</a></div>
+      <% } %>
+    </div>
+    <button type="button" class="navbar__toggle" aria-label="Mở menu điều hướng" aria-controls="main-navigation" aria-expanded="false"><%- include('icon', { name: 'menu' }) %></button>
   </div>
 </nav>
-<main class="main-content">
-<% if (typeof currentUser !== 'undefined' && currentUser) { %>
-  <div class="auth-account" aria-label="Tài khoản đang đăng nhập">
-    <span class="auth-account__email"><%= currentUser.email %></span>
-    <a href="/account/security" class="btn auth-account__logout">Bảo Mật</a>
-    <form action="/logout" method="POST">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <button type="submit" class="btn auth-account__logout">Đăng Xuất</button>
-    </form>
-  </div>
-<% } %>
+<main class="main-content" id="main-content" tabindex="-1">
