@@ -36,7 +36,9 @@ function deny(res) {
 
 function requirePermission(permission) {
   return (req, res, next) => {
-    if (!can(res.locals.currentUser, permission)) return deny(res);
+    // This gate checks role permissions before the resource has been loaded.
+    // Dish handlers enforce ABAC with authorize(user, permission, databaseDish).
+    if (!hasPermission(res.locals.currentUser, permission)) return deny(res);
     next();
   };
 }
