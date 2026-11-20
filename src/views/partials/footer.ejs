@@ -14,9 +14,11 @@
         <h4 class="footer__heading">Điều Hướng</h4>
         <ul class="footer__links">
           <li><a href="/dishes">Thực Đơn Khách Hàng</a></li>
-          <li><a href="/admin/dishes">Quản Trị Món Ăn</a></li>
-          <li><a href="/admin/chefs">Quản Trị Đầu Bếp</a></li>
-          <li><a href="/admin/ingredients">Quản Trị Nguyên Liệu</a></li>
+          <% if (can(currentUser, 'admin:read')) { %>
+            <li><a href="/admin/dishes">Quản Trị Món Ăn</a></li>
+            <li><a href="/admin/chefs">Quản Trị Đầu Bếp</a></li>
+            <li><a href="/admin/ingredients">Quản Trị Nguyên Liệu</a></li>
+          <% } %>
         </ul>
       </div>
 

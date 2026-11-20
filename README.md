@@ -8,7 +8,7 @@
 - Quản trị SSR: quản lý món ăn, đầu bếp và nguyên liệu tại `/admin`.
 - Tài khoản: đăng ký với CAPTCHA, kích hoạt bằng OTP email, đăng nhập, đăng xuất, quên và đặt lại mật khẩu.
 - Bảo mật phiên: session lưu trong PostgreSQL; form ghi được bảo vệ CSRF; có giới hạn thử và cookie bảo mật.
-- RBAC: `viewer` chỉ xem; `editor` được tạo và cập nhật; `admin` được tạo, cập nhật và xóa.
+- RBAC: `viewer` xem thực đơn công khai tại `/dishes`; `editor` có quyền xem, tạo và cập nhật trong cổng quản trị; `admin` có thêm quyền xóa.
 - ABAC: editor chỉ cập nhật món `draft` được gán cho đầu bếp của mình; admin có thể cập nhật mọi món.
 - MFA tùy chọn cho tài khoản: TOTP qua ứng dụng xác thực, mã khôi phục dùng một lần, bật/tắt và cấu hình lại từ trang bảo mật tài khoản.
 

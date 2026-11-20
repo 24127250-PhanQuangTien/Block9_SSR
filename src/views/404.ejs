@@ -23,7 +23,9 @@
       <p class="error-desc"><%= message || "Tài nguyên bạn đang tìm kiếm không tồn tại trên hệ thống hoặc ID cung cấp không hợp lệ." %></p>
       <div class="error-actions">
         <a href="/dishes" class="btn btn--primary">← Về Thực Đơn Nhà Hàng</a>
-        <a href="/admin/dishes" class="btn btn--ghost">Về Cổng Quản Trị</a>
+        <% if (can(currentUser, 'admin:read')) { %>
+          <a href="/admin/dishes" class="btn btn--ghost">Về Cổng Quản Trị</a>
+        <% } %>
       </div>
     </div>
   </div>

@@ -52,6 +52,45 @@ test('SSR dish editing enforces RBAC first and database ABAC on GET and PATCH', 
       updates.length = 0;
     };
 
+    await t.test('viewer can read the public menu and is denied access to every admin section', async () =>
+    {
+      reset();
+      profile.role = 'viewer';
+      const publishedDish = fixture.rows.find(row => row.id === 2);
+      publishedDish.status = 'published';
+      try
+      {
+        const menu = await request('/dishes');
+        const guestMenu = await fetch(base + '/dishes');
+        assert.equal(menu.status, 200);
+        assert.equal(guestMenu.status, 200);
+        for (const html of [menu.html, await guestMenu.text()])
+        {
+          assert.match(html, /href="\/dishes\/2"/);
+          assert.doesNotMatch(html, /href="\/(?:dishes\/1"|admin\b)/);
+        }
+
+        fixture.calls.length = 0;
+        for (const route of ['/admin', '/admin/dishes', '/admin/dishes/1', '/admin/chefs', '/admin/ingredients'])
+        {
+          const response = await request(route);
+          assert.equal(response.status, 403, route);
+          assert.doesNotMatch(response.html, /href="\/admin\b/);
+        }
+        for (const route of ['/admin/dishes', patch, '/admin/dishes/1?_method=DELETE'])
+        {
+          assert.equal((await request(route, values)).status, 403, route);
+        }
+        assert.equal(fixture.calls.length, 0);
+        assert.equal(fixture.writes.length, 0);
+        assert.equal(updates.length, 0);
+      }
+      finally
+      {
+        delete publishedDish.status;
+      }
+    });
+
     await t.test('editor can open and submit their own draft; forged privileged fields are ignored', async () => {
       reset();
       const form = await request(edit);

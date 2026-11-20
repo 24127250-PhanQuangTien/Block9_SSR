@@ -1,5 +1,5 @@
 const permissions = Object.freeze({
-  viewer: new Set(["read"]),
+  viewer: new Set(),
   editor: new Set(["read", "create", "update"]),
   admin: new Set(["read", "create", "update", "delete"]),
 });

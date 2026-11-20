@@ -7,7 +7,7 @@ const { configuration, policy } = require("./config/authPolicy");
 const { PrismaSessionStore } = require("./services/sessionStore");
 const { prepare, csrf } = require("./middleware/csrf");
 const { requireLogin, optionalUser, cookieOptions } = require("./middleware/requireLogin");
-const { can } = require("./config/authorization");
+const { can, requirePermission } = require("./config/authorization");
 
 const dishesRouter = require("./routes/dishes");
 const adminDishesRouter = require("./routes/adminDishes");
@@ -60,7 +60,7 @@ app.use(require("./routes/auth")(prisma, config));
 // Public menu/detail pages can identify a signed-in user without requiring login.
 app.use("/dishes", optionalUser(prisma, config));
 // Guard all admin methods before CSRF, including POST override PATCH/DELETE.
-app.use("/admin", requireLogin(prisma, config));
+app.use("/admin", requireLogin(prisma, config), requirePermission("admin:read"));
 // Also reject unsafe unknown methods/paths without CSRF. Public auth POSTs above
 // already validate their token; protected routes reach this only after the guard.
 app.use(csrf(config));
