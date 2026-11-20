@@ -68,6 +68,219 @@
 .auth-form :focus-visible,.auth-links a:focus-visible,.auth-account button:focus-visible { outline: 3px solid var(--burgundy); outline-offset: 3px; }
 @media (max-width: 576px) { .auth-card { padding: 24px 16px; } .auth-account { justify-content: space-between; padding: 10px 24px; } }
 
+/* Account security MFA controls */
+.security-page {
+  padding: 120px 0 72px;
+  background: var(--cream);
+}
+
+.security-page__container {
+  max-width: 720px;
+}
+
+.security-page__card {
+  width: 100%;
+  max-width: 720px;
+  padding: 36px;
+  box-sizing: border-box;
+}
+
+.security-page__header {
+  margin-bottom: 24px;
+}
+
+.security-page__alert {
+  margin-bottom: 24px;
+}
+
+.security-page__status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 32px;
+  padding: 18px 20px;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius-md);
+  background: #f0fdf4;
+  color: var(--burgundy);
+}
+
+.security-page__status--off {
+  color: var(--charcoal);
+  border-color: var(--cream-dark);
+  background: var(--cream);
+  margin-bottom: 20px;
+}
+
+.security-page__status--off p {
+  margin: 0;
+  font-weight: 700;
+}
+
+.security-page__shield {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  color: #166534;
+}
+
+.security-page__status-title {
+  margin: 0 0 3px;
+  font-size: 1.15rem;
+  line-height: 1.25;
+  font-weight: 800;
+  color: var(--burgundy);
+}
+
+.security-page__status-copy {
+  margin: 0;
+  color: #374151;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.security-page__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.security-page__card-item {
+  border: 1px solid #e7e5e4;
+  border-radius: var(--radius-md);
+  background: var(--white);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.security-page__card-item h2 {
+  margin: 0;
+  color: var(--charcoal);
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.security-page__description {
+  margin: 10px 0 20px;
+  color: var(--stone-light);
+  line-height: 1.55;
+}
+
+.security-page__form {
+  gap: 18px;
+}
+
+.security-page__form .form-group {
+  gap: 7px;
+  margin: 0;
+}
+
+.security-page__hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.security-page__button {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  text-align: center;
+  margin-top: 2px;
+  box-sizing: border-box;
+}
+
+.security-page__button--secondary {
+  color: var(--gold-dark) !important;
+  border-color: var(--gold) !important;
+  background: var(--white) !important;
+}
+
+.security-page__button--secondary:hover {
+  color: var(--charcoal) !important;
+  background: var(--cream-dark) !important;
+}
+
+.security-page__danger {
+  margin-top: 12px;
+  padding: 14px;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md);
+  background: #fff7f7;
+}
+
+.security-page__danger-label {
+  margin: 0 0 10px;
+  color: var(--burgundy);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.security-page__card-item--danger {
+  border-color: #fecaca;
+  background: #fffafa;
+  box-shadow: none;
+}
+
+.security-page__button--danger {
+  color: var(--burgundy);
+  border: 2px solid var(--burgundy);
+  background: var(--white);
+}
+
+.security-page__button--danger:hover {
+  color: var(--burgundy-dark);
+  border-color: var(--burgundy-dark);
+  background: #fee2e2;
+}
+
+.security-page :focus-visible {
+  outline: 3px solid var(--gold-dark);
+  outline-offset: 3px;
+}
+
+.security-page .form-control:focus-visible {
+  border-color: var(--gold-dark);
+  outline: 3px solid var(--gold-dark);
+  outline-offset: 2px;
+}
+
+.security-page__button:focus-visible {
+  outline: 3px solid var(--burgundy);
+  outline-offset: 3px;
+}
+
+@media (max-width: 576px) {
+  .security-page {
+    padding: 100px 0 48px;
+  }
+
+  .security-page__container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .security-page__card {
+    padding: 24px 18px;
+  }
+
+  .security-page__status {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .security-page__card-item {
+    padding: 20px 16px;
+  }
+
+  .security-page__danger {
+    padding: 10px;
+  }
+}
+
 .pagination-summary {
   margin: 16px 0;
   color: var(--stone-light);

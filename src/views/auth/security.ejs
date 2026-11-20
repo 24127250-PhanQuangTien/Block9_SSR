@@ -1,37 +1,94 @@
 <%- include('../partials/header', { title }) %>
 <%- include('../partials/navbar', { solidNavbar: true }) %>
-<section class="section" style="padding-top: 120px;"><div class="container"><div class="form-card">
-  <div class="form-header"><h1 class="form-title">Bảo Mật Tài Khoản</h1><p class="form-subtitle">MFA được quản lý riêng cho tài khoản hiện tại.</p></div>
-  <% if (error) { %><div class="alert alert-danger" role="alert"><%= error %></div><% } %>
-  <% if (!mfaEnabled) { %>
-    <p>MFA hiện đang tắt.</p>
-    <form action="/account/security/setup" method="POST"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn--primary">Bắt Đầu Thiết Lập MFA</button></form>
-  <% } else { %>
-    <p>MFA hiện đang bật.</p>
-    <hr>
-    <h2>Tạo lại mã khôi phục</h2>
-    <form action="/account/security/recovery/regenerate" method="POST" class="standard-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
-      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
-      <button class="btn btn--primary">Tạo nhóm mã mới</button>
-    </form>
-    <hr>
-    <h2>Thiết lập lại ứng dụng</h2>
-    <form action="/account/security/resetup" method="POST" class="standard-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
-      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
-      <button class="btn btn--primary">Đổi thiết bị MFA</button>
-    </form>
-    <hr>
-    <h2>Tắt MFA</h2>
-    <form action="/account/security/disable" method="POST" class="standard-form">
-      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-      <input name="password" type="password" class="form-control" placeholder="Mật khẩu hiện tại" required>
-      <input name="code" class="form-control" placeholder="Mã TOTP hoặc recovery code" required>
-      <button class="btn btn--ghost">Tắt MFA</button>
-    </form>
-  <% } %>
-</div></div></section>
+<section class="section security-page" id="main-content">
+  <div class="container security-page__container">
+    <div class="form-card security-page__card">
+      <div class="form-header security-page__header">
+        <h1 class="form-title">Bảo Mật Tài Khoản</h1>
+        <p class="form-subtitle">MFA được quản lý riêng cho tài khoản hiện tại.</p>
+      </div>
+
+      <% if (error) { %><div class="alert alert-danger security-page__alert" role="alert"><%= error %></div><% } %>
+
+      <% if (!mfaEnabled) { %>
+        <div class="security-page__status security-page__status--off">
+          <p>MFA hiện đang tắt.</p>
+        </div>
+        <form action="/account/security/setup" method="POST" class="standard-form security-page__setup-form">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button type="submit" class="btn btn--primary security-page__button">Bắt Đầu Thiết Lập MFA</button>
+        </form>
+      <% } else { %>
+        <div class="security-page__status" role="status">
+          <svg class="security-page__shield" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 2l7 3v5c0 5-3 9-7 11-4-2-7-6-7-11V5l7-3zm0 2.2L7 6v4c0 3.8 2.1 7 5 8.7 2.9-1.7 5-4.9 5-8.7V6l-5-1.8zm-1 4.3h2v5h-2v-5zm0 7h2v2h-2v-2z" fill="currentColor"/>
+          </svg>
+          <div>
+            <p class="security-page__status-title">MFA đang bật</p>
+            <p class="security-page__status-copy">Tài khoản được bảo vệ bằng ứng dụng xác thực (mã TOTP).</p>
+          </div>
+        </div>
+
+        <div class="security-page__actions">
+          <article class="security-page__card-item">
+            <h2>Tạo lại mã khôi phục</h2>
+            <p class="security-page__description">Tạo 10 mã mới. Nhóm mã cũ bị vô hiệu. Mỗi mã chỉ dùng được một lần.</p>
+            <form action="/account/security/recovery/regenerate" method="POST" class="standard-form security-page__form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="form-group">
+                <label for="recovery-password" class="form-label">Mật khẩu hiện tại</label>
+                <input id="recovery-password" name="password" type="password" class="form-control" autocomplete="current-password" placeholder="Mật khẩu hiện tại" required>
+              </div>
+              <div class="form-group">
+                <label for="recovery-code" class="form-label">Mã TOTP hoặc recovery code</label>
+                <input id="recovery-code" name="code" class="form-control" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="Mã TOTP hoặc recovery code" required>
+                <p class="security-page__hint">Mã 6 số trong ứng dụng xác thực, hoặc một recovery code chưa dùng.</p>
+              </div>
+              <button type="submit" class="btn btn--primary security-page__button">Tạo nhóm mã mới</button>
+            </form>
+          </article>
+
+          <article class="security-page__card-item">
+            <h2>Thiết lập lại ứng dụng</h2>
+            <p class="security-page__description">Dùng khi đổi điện thoại hoặc cài lại ứng dụng xác thực. Bạn sẽ quét mã QR mới; mục cũ trong ứng dụng sẽ không còn dùng được.</p>
+            <form action="/account/security/resetup" method="POST" class="standard-form security-page__form">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <div class="form-group">
+                <label for="resetup-password" class="form-label">Mật khẩu hiện tại</label>
+                <input id="resetup-password" name="password" type="password" class="form-control" autocomplete="current-password" placeholder="Mật khẩu hiện tại" required>
+              </div>
+              <div class="form-group">
+                <label for="resetup-code" class="form-label">Mã TOTP hoặc recovery code</label>
+                <input id="resetup-code" name="code" class="form-control" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="Mã TOTP hoặc recovery code" required>
+                <p class="security-page__hint">Mã 6 số trong ứng dụng xác thực, hoặc một recovery code chưa dùng.</p>
+              </div>
+              <button type="submit" class="btn btn--outline security-page__button security-page__button--secondary">Đổi thiết bị MFA</button>
+            </form>
+          </article>
+
+          <section class="security-page__danger" aria-labelledby="security-danger-title">
+            <p class="security-page__danger-label">Vùng nguy hiểm</p>
+            <article class="security-page__card-item security-page__card-item--danger">
+              <h2 id="security-danger-title">Tắt MFA</h2>
+              <p class="security-page__description">Tài khoản sẽ chỉ còn mật khẩu để đăng nhập. Mã khôi phục sẽ bị xóa.</p>
+              <form action="/account/security/disable" method="POST" class="standard-form security-page__form">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <div class="form-group">
+                  <label for="disable-password" class="form-label">Mật khẩu hiện tại</label>
+                  <input id="disable-password" name="password" type="password" class="form-control" autocomplete="current-password" placeholder="Mật khẩu hiện tại" required>
+                </div>
+                <div class="form-group">
+                  <label for="disable-code" class="form-label">Mã TOTP hoặc recovery code</label>
+                  <input id="disable-code" name="code" class="form-control" autocomplete="one-time-code" autocapitalize="off" spellcheck="false" placeholder="Mã TOTP hoặc recovery code" required>
+                  <p class="security-page__hint">Mã 6 số trong ứng dụng xác thực, hoặc một recovery code chưa dùng.</p>
+                </div>
+                <button type="submit" class="btn security-page__button security-page__button--danger">Tắt MFA</button>
+              </form>
+            </article>
+          </section>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
 <%- include('../partials/footer') %>
